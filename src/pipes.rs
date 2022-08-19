@@ -7,10 +7,10 @@ use crate::*;
 #[derive(Component)]
 pub struct PipeParent {
     pub x: f32,
-    height: f32,
-    width: f32,
-    y_gap: f32,
-    pub passed: bool,
+    height_sprites: u32,
+    width_sprites: f32, // has to be f32, because of 1.5
+    y_gap_sprites: u32,
+    // pub passed: bool,
     passed_score: bool, // give score in the middle of the pipe
     blocks: Vec<Entity>,
 }
@@ -20,16 +20,16 @@ pub struct PipeBlock;
 
 impl PipeParent {
     pub fn reset(&mut self, commands: &mut Commands, atlas_handle: &Handle<TextureAtlas>, x: f32) {
-        self.passed = false;
+        // self.passed = false;
         self.passed_score = false;
 
         let mut rng = thread_rng();
 
-        let new_height = rng.gen_range(PIPE_HEIGHT_RANGE[0]..=PIPE_HEIGHT_RANGE[1]);
+        let new_height = rng.gen_range(PIPE_HEIGHT_RANGE_SPR[0]..=PIPE_HEIGHT_RANGE_SPR[1]);
         // let new_x = SCREEN_X_BOUNDARY + SPRITE_SIZE;
 
         self.x = x;
-        self.height = new_height;
+        self.height_sprites = new_height;
 
         // despawn old blocks
         for block in self.blocks.iter_mut() {
@@ -43,15 +43,15 @@ impl PipeParent {
 
     fn spawn_blocks(&mut self, commands: &mut Commands, atlas_handle: &Handle<TextureAtlas>) {
         // spawn bottom pipe
-        for i in 0..(self.height/SPRITE_SIZE).ceil() as u32 {
+        for i in 0..self.height_sprites {
             for j in 0..PIPE_WIDTH {
     
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
-                self.width = block_x - self.x + SPRITE_SIZE;
+                self.width_sprites = (block_x - self.x + SPRITE_SIZE)/SPRITE_SIZE;
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, PIPE_FLOOR_Y + (i as f32 * SPRITE_SIZE), 0.0)),
+                    transform: Transform::from_translation(Vec3::new(block_x, (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE, 0.0)),
                     sprite: TextureAtlasSprite::new(1),
                     ..Default::default()
                 })
@@ -60,14 +60,14 @@ impl PipeParent {
         }
 
         // spawn top pipe
-        for i in 0..((-PIPE_FLOOR_Y - PIPE_FLOOR_Y - self.height - self.y_gap)/SPRITE_SIZE).ceil() as u32 {
+        for i in 0..(((-PIPE_FLOOR_Y_SPR) * 2) as u32 - self.height_sprites - self.y_gap_sprites) {
             for j in 0..PIPE_WIDTH {
     
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, -PIPE_FLOOR_Y - (i as f32 * SPRITE_SIZE), 0.0)),
+                    transform: Transform::from_translation(Vec3::new(block_x, (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE, 0.0)),
                     sprite: TextureAtlasSprite::new(1),
                     ..Default::default()
                 })
@@ -80,16 +80,16 @@ impl PipeParent {
 
 pub fn spawn_pipe(mut commands: &mut Commands, atlas_handle: &Handle<TextureAtlas>, x: f32) {
     let mut rng = thread_rng();
-    let height = rng.gen_range(200..=600) as f32;
+    let height = rng.gen_range(PIPE_HEIGHT_RANGE_SPR[0]..=PIPE_HEIGHT_RANGE_SPR[1]);
 
     let blocks: Vec<Entity> = Vec::new();
 
     let mut pipe = PipeParent {
         x,
-        height,
-        width: 0.0,
-        y_gap: PIPE_Y_GAP,
-        passed: false,
+        height_sprites: height,
+        width_sprites: 0.0,
+        y_gap_sprites: PIPE_Y_GAP_SPR,
+        // passed: false,
         passed_score: false,
         blocks,
     };
@@ -131,29 +131,29 @@ pub fn pipe_system (
             }
 
             // check if player gained point
-            if !pipe.passed_score && pipe.x - (pipe.width / 2.0) < player_transform.translation.x - SPRITE_SIZE {
+            if !pipe.passed_score && pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x - SPRITE_SIZE {
                 pipe.passed_score = true;
                 game_controller.score += 1;
             }
 
-            // check if player passed pipe
-            if !pipe.passed && pipe.x + (pipe.width / 2.0) < player_transform.translation.x - SPRITE_SIZE {
-                pipe.passed = true;
-            }
+            // // check if player passed pipe
+            // if !pipe.passed && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x - SPRITE_SIZE {
+            //     pipe.passed = true;
+            // }
 
             // check if player touches bottom pipe
-            if pipe.x - (pipe.width / 2.0) < player_transform.translation.x
-                && pipe.x + (pipe.width / 2.0) > player_transform.translation.x
-                && PIPE_FLOOR_Y + pipe.height >= player_transform.translation.y
+            if pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x
+                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) > player_transform.translation.x
+                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32) as f32 * SPRITE_SIZE >= player_transform.translation.y
                 {
                 
                     player.dead = true;
             }
 
             // check if player touches top pipe
-            if pipe.x - (pipe.width / 2.0) < player_transform.translation.x
-                && pipe.x + (pipe.width / 2.0) > player_transform.translation.x
-                && PIPE_FLOOR_Y + pipe.height + pipe.y_gap <= player_transform.translation.y
+            if pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x
+                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) > player_transform.translation.x
+                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32 + pipe.y_gap_sprites as i32) as f32 * SPRITE_SIZE <= player_transform.translation.y
                 {
 
                     player.dead = true;

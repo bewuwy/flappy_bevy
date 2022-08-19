@@ -62,9 +62,7 @@ fn setup(
     .insert(Player { delta_y: 0.0, dead: false });
 
     // Spawn pipes
-    const PIPE_NUMBER: u32 = 5;
-
-    for i in 0..PIPE_NUMBER {
+    for i in 0..PIPES_NUMBER {
         spawn_pipe(&mut commands, &texture_atlas_handle, PIPES_START_X + i as f32 * PIPES_GAP_BETWEEN);
     }
     
