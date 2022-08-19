@@ -62,7 +62,6 @@ pub fn ui_setup(
                 align_self: AlignSelf::Center,
                 margin: UiRect {
                     top: Val::Percent(-35.0),
-                    left: Val::Percent(10.0),
                     ..Default::default()
                 },
                 ..default()

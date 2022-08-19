@@ -17,5 +17,6 @@ pub static PIPE_WIDTH: u32 = 2;
 pub static PIPE_SPEED: f32 = 5.0;
 
 
+pub static PLAYER_X: f32 = -64.0;
 pub static PLAYER_START_Y: f32 = -200.0;
 

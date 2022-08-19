@@ -55,7 +55,7 @@ fn setup(
     // Spawn the player
     commands.spawn().insert_bundle(SpriteSheetBundle {
         texture_atlas: texture_atlas_handle.clone(),
-        transform: Transform::from_translation(Vec3::new(0.0, PLAYER_START_Y, 1.0)),
+        transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, 1.0)),
         sprite: TextureAtlasSprite::new(0),
         ..Default::default()
     })
