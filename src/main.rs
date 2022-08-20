@@ -7,11 +7,13 @@ use serde::{Deserialize, Serialize};
 
 mod player;
 mod pipes;
+mod clouds;
 mod ui;
 mod options;
 
 use player::*;
 use pipes::*;
+use clouds::*;
 use ui::*;
 use options::*;
 
@@ -34,6 +36,7 @@ fn main() {
         .add_startup_system(setup)
         .add_system(player_system)
         .add_system(pipe_system)
+        .add_plugin(CloudsPlugin)
 
         // UI
         .add_plugin(UIPlugin)
@@ -73,7 +76,7 @@ fn setup(
     // Spawn the player
     commands.spawn().insert_bundle(SpriteSheetBundle {
         texture_atlas: texture_atlas_handle.clone(),
-        transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, 1.0)),
+        transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, Z_PLAYER)),
         sprite: TextureAtlasSprite::new(0),
         ..Default::default()
     })
@@ -82,6 +85,11 @@ fn setup(
     // Spawn pipes
     for i in 0..PIPES_NUMBER {
         spawn_pipe(&mut commands, &texture_atlas_handle, PIPES_START_X + i as f32 * PIPES_GAP_BETWEEN);
+    }
+
+    // Spawn clouds
+    for i in 0..CLOUDS_NUMBER {
+        spawn_cloud(&mut commands, &texture_atlas_handle, CLOUDS_START_X + i as f32 * CLOUDS_GAP_BETWEEN);
     }
     
     // Spawn the game controller

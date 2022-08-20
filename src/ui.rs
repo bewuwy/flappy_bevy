@@ -72,7 +72,7 @@ fn ui_setup(
                 TextSection::from_style(TextStyle {
                     font: asset_server.load("font.ttf"),
                     font_size: 80.0,
-                    color: Color::WHITE,
+                    color: Color::BLACK,
                 }),
             ])
             .with_style(Style {

@@ -59,7 +59,7 @@ impl PipeParent {
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE, 0.0)),
+                    transform: Transform::from_translation(Vec3::new(block_x, (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE, Z_PIPE)),
                     sprite,
                     ..Default::default()
                 })
@@ -84,7 +84,7 @@ impl PipeParent {
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE, 0.0)),
+                    transform: Transform::from_translation(Vec3::new(block_x, (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE, Z_PIPE)),
                     sprite,
                     ..Default::default()
                 })
