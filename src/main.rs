@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, Diagnostics};
+
 use bevy_framepace;
+use bevy_pkv::PkvStore;
+use serde::{Deserialize, Serialize};
 
 mod player;
 mod pipes;
@@ -16,7 +19,7 @@ use options::*;
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
-            title: "Flappy Bevy".to_string(),
+            title: GAME_NAME.to_string(),
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
@@ -34,6 +37,9 @@ fn main() {
         // UI
         .add_plugin(UIPlugin)
 
+        // Saving plugin
+        .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
+
         .run();
 }
 
@@ -42,6 +48,7 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    pkv: ResMut<PkvStore>,
 ) {
 
     // Setup the sprite sheet
@@ -52,6 +59,12 @@ fn setup(
         SPRITESHEET_COLS, SPRITESHEET_ROWS,
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
+    // Load saved data
+    let stats: PlayerStatistics = pkv.get::<PlayerStatistics>(PLAYER_STATS_KEY)
+    .unwrap_or_else(|_| PlayerStatistics {
+        high_score: 0,
+    });
 
     // Add a 2D Camera
     commands.spawn_bundle(Camera2dBundle::default());
@@ -71,7 +84,7 @@ fn setup(
     }
     
     // Spawn the game controller
-    commands.spawn().insert(GameController{ started: false, score: 0 });
+    commands.spawn().insert(GameController{ started: false, score: 0, player_stats: stats });
 }
 
 
@@ -79,6 +92,7 @@ fn setup(
 pub struct GameController {
     started: bool,
     score: u32,
+    player_stats: PlayerStatistics,
 }
 
 impl GameController {
@@ -88,10 +102,19 @@ impl GameController {
         atlas_handle: &Handle<TextureAtlas>, 
         player: &mut Player, 
         mut player_transform: &mut Transform, 
-        pipes_query: &mut Query<&mut PipeParent>
+        pipes_query: &mut Query<&mut PipeParent>,
+        mut pkv: ResMut<PkvStore>,
     ) {
 
         self.started = false;
+
+        if self.score > self.player_stats.high_score {
+            self.player_stats.high_score = self.score;
+
+            // Save the high score
+            pkv.set(PLAYER_STATS_KEY, &self.player_stats).expect("Failed to save high score");
+        }
+
         self.score = 0;
 
         player.die(&mut player_transform);
@@ -103,4 +126,9 @@ impl GameController {
             i += 1.0;
         }
     }
+}
+
+#[derive(Serialize, Deserialize)]
+struct PlayerStatistics {
+    high_score: u32,
 }

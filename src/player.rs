@@ -29,6 +29,7 @@ pub fn player_system(
     mut controller_query: Query<&mut GameController>,
     mut pipes_query: Query<&mut PipeParent>,
     mut commands: Commands,
+    pkv: ResMut<PkvStore>,
 ) {
 
     const MIN_ROTATION : f32 = -0.4;
@@ -71,7 +72,7 @@ pub fn player_system(
     if player.dead {
 
         // reset game
-        game_controller.reset_game(&mut commands, &atlas_handle, &mut player, &mut transform, &mut pipes_query);
+        game_controller.reset_game(&mut commands, &atlas_handle, &mut player, &mut transform, &mut pipes_query, pkv);
     }
 
 }
