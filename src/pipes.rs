@@ -48,11 +48,19 @@ impl PipeParent {
     
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
                 self.width_sprites = (block_x - self.x + SPRITE_SIZE)/SPRITE_SIZE;
+
+                let flip_x = j + 1 == PIPE_WIDTH;
+                let index = if i + 1 == self.height_sprites {
+                    2
+                } else {
+                    1
+                };
+                let sprite = TextureAtlasSprite { index, flip_x, ..Default::default() };
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
                     transform: Transform::from_translation(Vec3::new(block_x, (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE, 0.0)),
-                    sprite: TextureAtlasSprite::new(1),
+                    sprite,
                     ..Default::default()
                 })
                 .insert(PipeBlock).id());
@@ -60,15 +68,24 @@ impl PipeParent {
         }
 
         // spawn top pipe
-        for i in 0..(((-PIPE_FLOOR_Y_SPR) * 2) as u32 - self.height_sprites - self.y_gap_sprites) {
+        let top_blocks = ((-PIPE_FLOOR_Y_SPR) * 2) as u32 - self.height_sprites - self.y_gap_sprites;
+        for i in 0..top_blocks {
             for j in 0..PIPE_WIDTH {
     
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
+
+                let flip_x = j + 1 == PIPE_WIDTH;
+                let index = if i + 1 == top_blocks {
+                    2
+                } else {
+                    1
+                };
+                let sprite = TextureAtlasSprite { index, flip_x, flip_y: true, ..Default::default() };
     
                 self.blocks.push(commands.spawn().insert_bundle(SpriteSheetBundle {
                     texture_atlas: atlas_handle.clone(),
                     transform: Transform::from_translation(Vec3::new(block_x, (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE, 0.0)),
-                    sprite: TextureAtlasSprite::new(1),
+                    sprite,
                     ..Default::default()
                 })
                 .insert(PipeBlock).id());
@@ -89,7 +106,6 @@ pub fn spawn_pipe(mut commands: &mut Commands, atlas_handle: &Handle<TextureAtla
         height_sprites: height,
         width_sprites: 0.0,
         y_gap_sprites: PIPE_Y_GAP_SPR,
-        // passed: false,
         passed_score: false,
         blocks,
     };
@@ -135,11 +151,6 @@ pub fn pipe_system (
                 pipe.passed_score = true;
                 game_controller.score += 1;
             }
-
-            // // check if player passed pipe
-            // if !pipe.passed && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x - SPRITE_SIZE {
-            //     pipe.passed = true;
-            // }
 
             // check if player touches bottom pipe
             if pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x

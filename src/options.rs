@@ -1,4 +1,7 @@
+// spritesheet settings
 pub static SPRITE_SIZE: f32 = 64.0;
+pub static SPRITESHEET_ROWS: usize = 1;
+pub static SPRITESHEET_COLS: usize = 3;
 
 pub static SCREEN_X_BOUNDARY: f32 = 800.0;
 pub static SCREEN_Y_BOUNDARY: f32 = 500.0;

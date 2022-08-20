@@ -16,6 +16,7 @@ pub struct Player {
 impl Player {
     pub fn die(&mut self, player_transform: &mut Transform) {
         player_transform.translation.y = PLAYER_START_Y;
+        player_transform.rotate_z(0.0 - player_transform.rotation.z);
 
         self.dead = false;
     }
@@ -30,6 +31,11 @@ pub fn player_system(
     mut commands: Commands,
 ) {
 
+    const MIN_ROTATION : f32 = -0.4;
+    const MAX_ROTATION : f32 = 0.4;
+    const ROTATION_SPEED : f32 = 0.05;
+
+
     // get the player
     let (mut player, mut transform, atlas_handle) = query.single_mut();
 
@@ -40,12 +46,19 @@ pub fn player_system(
     if keyboard_input.pressed(KeyCode::Space) {
         player.delta_y = JUMP_FORCE;
         game_controller.started = true;
+
+        let rotation = MAX_ROTATION - transform.rotation.z;
+        transform.rotate_z(rotation);
     }
 
     // physics
     if game_controller.started {
         transform.translation.y += player.delta_y;
         player.delta_y -= GRAVITY;
+
+        if transform.rotation.z > MIN_ROTATION {
+            transform.rotate_z(-ROTATION_SPEED);
+        }
     }
 
     // check if player off screen
