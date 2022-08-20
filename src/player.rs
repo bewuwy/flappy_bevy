@@ -2,35 +2,35 @@ use bevy::prelude::*;
 
 use crate::*;
 
-
 static JUMP_FORCE: f32 = 8.0;
 static GRAVITY: f32 = 0.4;
 
 
-#[derive(Component)]
-pub struct Player {
-    pub delta_y: f32,
-    pub dead: bool,
-}
+fn player_setup(
+    mut commands: Commands,
+    player_handler: Res<PlayerHandler>,
+) {
 
-impl Player {
-    pub fn die(&mut self, player_transform: &mut Transform) {
-        self.delta_y = 0.0;
-        player_transform.translation.y = PLAYER_START_Y;
-        player_transform.rotation.z = 0.0;
-        player_transform.rotation.w = 1.0;
+    // Spawn the player
+    let texture = &player_handler.texture;
+    commands.spawn().insert_bundle(SpriteBundle {
+        texture: texture.clone(),
+        transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, Z_PLAYER)),
+        sprite: Sprite {..Default::default()},
+        ..Default::default()
+    })
+    .insert(Player { delta_y: 0.0, dead: false });
 
-        self.dead = false;
-    }
 }
 
 
 pub fn player_system(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Player, &mut Transform, &mut Handle<TextureAtlas>)>,
+    mut query: Query<(&mut Player, &mut Transform)>,
     mut controller_query: Query<&mut GameController>,
     mut pipes_query: Query<&mut PipeParent>,
     mut commands: Commands,
+    pipes_handler: Res<PipesHandler>,
     pkv: ResMut<PkvStore>,
 ) {
     const MIN_ROTATION : f32 = -0.4;
@@ -39,7 +39,7 @@ pub fn player_system(
 
 
     // get the player
-    let (mut player, mut transform, atlas_handle) = query.single_mut();
+    let (mut player, mut transform) = query.single_mut();
 
     // get the game controller
     let mut game_controller = controller_query.single_mut();
@@ -83,7 +83,52 @@ pub fn player_system(
     if player.dead {
 
         // reset game
-        game_controller.reset_game(&mut commands, &atlas_handle, &mut player, &mut transform, &mut pipes_query, pkv);
+        game_controller.reset_game(&mut commands, &mut player, &mut transform, &mut pipes_query, &pipes_handler, pkv);
     }
 
+}
+
+
+// #[derive(Default)]
+struct PlayerHandler {
+    texture: Handle<Image>,
+}
+
+impl FromWorld for PlayerHandler {
+    fn from_world(world: &mut World) -> Self {
+        let asset_server = world.get_resource::<AssetServer>().unwrap();
+
+        PlayerHandler {
+            texture: asset_server.load("sprites/bird.png"),
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct Player {
+    pub delta_y: f32,
+    pub dead: bool,
+}
+
+impl Player {
+    pub fn die(&mut self, player_transform: &mut Transform) {
+        self.delta_y = 0.0;
+        player_transform.translation.y = PLAYER_START_Y;
+        player_transform.rotation.z = 0.0;
+        player_transform.rotation.w = 1.0;
+
+        self.dead = false;
+    }
+}
+
+
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            .init_resource::<PlayerHandler>()
+            .add_startup_system(player_setup)
+            .add_system(player_system);
+    }
 }

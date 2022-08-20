@@ -7,6 +7,8 @@ fn ui_setup(
     mut commands: Commands, 
     asset_server: Res<AssetServer>
 ) {
+    const FONT_PATH: &str = "fonts/font.ttf";
+
     commands.spawn_bundle(NodeBundle {
         style: Style {
             size: Size::new(
@@ -28,13 +30,13 @@ fn ui_setup(
                 TextSection::new(
                     "FPS: ",
                     TextStyle {
-                        font: asset_server.load("font.ttf"),
+                        font: asset_server.load(FONT_PATH),
                         font_size: 30.0,
                         color: Color::WHITE,
                     },
                 ),
                 TextSection::from_style(TextStyle {
-                    font: asset_server.load("font.ttf"),
+                    font: asset_server.load(FONT_PATH),
                     font_size: 30.0,
                     color: Color::GOLD,
                 }),
@@ -55,9 +57,9 @@ fn ui_setup(
         parent.spawn_bundle(
             TextBundle::from_sections([
                 TextSection::from_style(TextStyle {
-                    font: asset_server.load("font.ttf"),
+                    font: asset_server.load(FONT_PATH),
                     font_size: 50.0,
-                    color: Color::WHITE,
+                    color: Color::BLACK,
                 }),
             ])
             .with_style(Style {
@@ -70,7 +72,7 @@ fn ui_setup(
         parent.spawn_bundle(
             TextBundle::from_sections([
                 TextSection::from_style(TextStyle {
-                    font: asset_server.load("font.ttf"),
+                    font: asset_server.load(FONT_PATH),
                     font_size: 80.0,
                     color: Color::BLACK,
                 }),
