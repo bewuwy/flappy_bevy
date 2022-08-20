@@ -22,6 +22,7 @@ fn main() {
             title: GAME_NAME.to_string(),
             ..Default::default()
         })
+        .insert_resource(ClearColor(Color::rgb(BACKGROUND_COLOR[0]/255.0, BACKGROUND_COLOR[1]/255.0, BACKGROUND_COLOR[2]/255.0)))
         .add_plugins(DefaultPlugins)
         
         // FPS

@@ -15,8 +15,10 @@ pub struct Player {
 
 impl Player {
     pub fn die(&mut self, player_transform: &mut Transform) {
+        self.delta_y = 0.0;
         player_transform.translation.y = PLAYER_START_Y;
-        player_transform.rotate_z(0.0 - player_transform.rotation.z);
+        player_transform.rotation.z = 0.0;
+        player_transform.rotation.w = 1.0;
 
         self.dead = false;
     }
@@ -31,7 +33,6 @@ pub fn player_system(
     mut commands: Commands,
     pkv: ResMut<PkvStore>,
 ) {
-
     const MIN_ROTATION : f32 = -0.4;
     const MAX_ROTATION : f32 = 0.4;
     const ROTATION_SPEED : f32 = 0.05;
@@ -53,12 +54,22 @@ pub fn player_system(
     }
 
     // physics
+    transform.translation.y += player.delta_y;
+
     if game_controller.started {
-        transform.translation.y += player.delta_y;
         player.delta_y -= GRAVITY;
 
         if transform.rotation.z > MIN_ROTATION {
             transform.rotate_z(-ROTATION_SPEED);
+        }
+    }
+    else {
+        // idle animation
+        if transform.translation.y > PLAYER_START_Y - 20.0 {
+            player.delta_y -= GRAVITY/4.0;
+        }
+        else {
+            player.delta_y += GRAVITY/2.0;
         }
     }
 
