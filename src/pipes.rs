@@ -3,28 +3,27 @@ use rand::prelude::*;
 
 use crate::*;
 
-
-fn pipes_setup(
-    mut commands: Commands,
-    pipes_handler: Res<PipesHandler>,
-) {
+fn pipes_setup(mut commands: Commands, pipes_handler: Res<PipesHandler>) {
     const PIPES_NUMBER: u32 = 5;
 
     // Spawn pipes
     for i in 0..PIPES_NUMBER {
-        spawn_pipe(&mut commands, &pipes_handler, PIPES_START_X + i as f32 * PIPES_GAP_BETWEEN);
+        spawn_pipe(
+            &mut commands,
+            &pipes_handler,
+            PIPES_START_X + i as f32 * PIPES_GAP_BETWEEN,
+        );
     }
 }
 
-pub fn pipes_system (
+pub fn pipes_system(
     mut player_query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
     mut block_query: Query<(&mut PipeBlock, &mut Transform), Without<Player>>,
     mut controller_query: Query<&mut GameController>,
     mut commands: Commands,
-    pipes_handler: Res<PipesHandler>
+    pipes_handler: Res<PipesHandler>,
 ) {
-
     // get the game controller
     let mut game_controller = controller_query.single_mut();
 
@@ -43,38 +42,46 @@ pub fn pipes_system (
 
             // check if pipe off screen
             if pipe.x < -SCREEN_X_BOUNDARY {
-                pipe.reset(&mut commands, &pipes_handler, SCREEN_X_BOUNDARY+SPRITE_SIZE);
+                pipe.reset(
+                    &mut commands,
+                    &pipes_handler,
+                    SCREEN_X_BOUNDARY + SPRITE_SIZE,
+                );
             }
 
             // check if player gained point
-            if !pipe.passed_score && pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x - SPRITE_SIZE {
+            if !pipe.passed_score
+                && pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0)
+                    < player_transform.translation.x - SPRITE_SIZE
+            {
                 pipe.passed_score = true;
                 game_controller.score += 1;
             }
 
             // check if player touches bottom pipe
             if pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x
-                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) > player_transform.translation.x
-                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32) as f32 * SPRITE_SIZE >= player_transform.translation.y
-                {
-                
-                    player.dead = true;
+                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0)
+                    > player_transform.translation.x
+                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32) as f32 * SPRITE_SIZE
+                    >= player_transform.translation.y
+            {
+                player.dead = true;
             }
 
             // check if player touches top pipe
             if pipe.x - (pipe.width_sprites * SPRITE_SIZE / 2.0) < player_transform.translation.x
-                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0) > player_transform.translation.x
-                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32 + pipe.y_gap_sprites as i32) as f32 * SPRITE_SIZE <= player_transform.translation.y
-                {
-
-                    player.dead = true;
+                && pipe.x + (pipe.width_sprites * SPRITE_SIZE / 2.0)
+                    > player_transform.translation.x
+                && (PIPE_FLOOR_Y_SPR + pipe.height_sprites as i32 + pipe.y_gap_sprites as i32)
+                    as f32
+                    * SPRITE_SIZE
+                    <= player_transform.translation.y
+            {
+                player.dead = true;
             }
-
         }
-
     }
 }
-
 
 pub struct PipesHandler {
     texture_body: Handle<Image>,
@@ -133,9 +140,8 @@ impl PipeParent {
         // spawn bottom pipe
         for i in 0..self.height_sprites {
             for j in 0..PIPE_WIDTH {
-    
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
-                self.width_sprites = (block_x - self.x + SPRITE_SIZE)/SPRITE_SIZE;
+                self.width_sprites = (block_x - self.x + SPRITE_SIZE) / SPRITE_SIZE;
 
                 let flip_x = j + 1 == PIPE_WIDTH;
                 let texture = if i + 1 == self.height_sprites {
@@ -143,23 +149,35 @@ impl PipeParent {
                 } else {
                     &pipes_handler.texture_body
                 };
-                let sprite = Sprite { flip_x, ..Default::default() };
-
-                self.blocks.push(commands.spawn().insert_bundle(SpriteBundle {
-                    texture: texture.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE, Z_PIPE)),
-                    sprite,
+                let sprite = Sprite {
+                    flip_x,
                     ..Default::default()
-                })
-                .insert(PipeBlock).id());
+                };
+
+                self.blocks.push(
+                    commands
+                        .spawn()
+                        .insert_bundle(SpriteBundle {
+                            texture: texture.clone(),
+                            transform: Transform::from_translation(Vec3::new(
+                                block_x,
+                                (PIPE_FLOOR_Y_SPR + i as i32) as f32 * SPRITE_SIZE,
+                                Z_PIPE,
+                            )),
+                            sprite,
+                            ..Default::default()
+                        })
+                        .insert(PipeBlock)
+                        .id(),
+                );
             }
         }
 
         // spawn top pipe
-        let top_blocks = ((-PIPE_FLOOR_Y_SPR) * 2) as u32 - self.height_sprites - self.y_gap_sprites;
+        let top_blocks =
+            ((-PIPE_FLOOR_Y_SPR) * 2) as u32 - self.height_sprites - self.y_gap_sprites;
         for i in 0..top_blocks {
             for j in 0..PIPE_WIDTH {
-    
                 let block_x = self.x + j as f32 * 0.5 * SPRITE_SIZE;
 
                 let flip_x = j + 1 == PIPE_WIDTH;
@@ -168,20 +186,32 @@ impl PipeParent {
                 } else {
                     &pipes_handler.texture_body
                 };
-                let sprite = Sprite { flip_x, flip_y: true, ..Default::default() };
-    
-                self.blocks.push(commands.spawn().insert_bundle(SpriteBundle {
-                    texture: texture.clone(),
-                    transform: Transform::from_translation(Vec3::new(block_x, (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE, Z_PIPE)),
-                    sprite,
+                let sprite = Sprite {
+                    flip_x,
+                    flip_y: true,
                     ..Default::default()
-                })
-                .insert(PipeBlock).id());
+                };
+
+                self.blocks.push(
+                    commands
+                        .spawn()
+                        .insert_bundle(SpriteBundle {
+                            texture: texture.clone(),
+                            transform: Transform::from_translation(Vec3::new(
+                                block_x,
+                                (-PIPE_FLOOR_Y_SPR - i as i32) as f32 * SPRITE_SIZE,
+                                Z_PIPE,
+                            )),
+                            sprite,
+                            ..Default::default()
+                        })
+                        .insert(PipeBlock)
+                        .id(),
+                );
             }
         }
     }
 }
-
 
 pub fn spawn_pipe(commands: &mut Commands, pipes_handler: &PipesHandler, x: f32) {
     let mut rng = thread_rng();
@@ -205,13 +235,11 @@ pub fn spawn_pipe(commands: &mut Commands, pipes_handler: &PipesHandler, x: f32)
     commands.spawn().insert(pipe);
 }
 
-
 pub struct PipesPlugin;
 
 impl Plugin for PipesPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<PipesHandler>()
+        app.init_resource::<PipesHandler>()
             .add_startup_system(pipes_setup)
             .add_system(pipes_system);
     }

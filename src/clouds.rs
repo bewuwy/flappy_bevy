@@ -4,21 +4,23 @@ use rand::prelude::*;
 
 use crate::*;
 
-
-fn clouds_setup (
+fn clouds_setup(
     mut commands: Commands,
     // asset_server: Res<AssetServer>,
     clouds_handler: Res<CloudsHandler>,
 ) {
     // settings
     const CLOUDS_NUMBER: usize = 8;
-    
+
     // Spawn clouds
     for i in 0..CLOUDS_NUMBER {
-        spawn_cloud(&mut commands,&clouds_handler, CLOUDS_START_X + i as f32 * CLOUDS_GAP_BETWEEN);
+        spawn_cloud(
+            &mut commands,
+            &clouds_handler,
+            CLOUDS_START_X + i as f32 * CLOUDS_GAP_BETWEEN,
+        );
     }
 }
-
 
 fn clouds_system(
     mut query: Query<&mut CloudParent>,
@@ -26,7 +28,6 @@ fn clouds_system(
     mut commands: Commands,
     clouds_manager: Res<CloudsHandler>,
 ) {
-    
     for mut cloud in query.iter_mut() {
         cloud.x += CLOUDS_SPEED;
 
@@ -39,7 +40,6 @@ fn clouds_system(
         transform.translation.x += CLOUDS_SPEED;
     }
 }
-
 
 // #[derive(Default)]
 struct CloudsHandler {
@@ -85,25 +85,33 @@ impl CloudParent {
 
     fn spawn_blocks(&mut self, commands: &mut Commands, clouds_handler: &CloudsHandler) {
         for i in 0..self.width_sprites {
-            let block = { 
+            let block = {
                 let texture = {
                     if i == 0 {
-                        &clouds_handler.texture_start      
+                        &clouds_handler.texture_start
                     } else {
                         &clouds_handler.texture_end
                     }
                 };
-    
-                commands.spawn()
+
+                commands
+                    .spawn()
                     .insert_bundle(SpriteBundle {
                         texture: texture.clone(),
-                        transform: Transform::from_translation(Vec3::new(self.x + i as f32 * SPRITE_SIZE, self.y, Z_BACKGROUND)),
-                        sprite: Sprite {..Default::default()},
+                        transform: Transform::from_translation(Vec3::new(
+                            self.x + i as f32 * SPRITE_SIZE,
+                            self.y,
+                            Z_BACKGROUND,
+                        )),
+                        sprite: Sprite {
+                            ..Default::default()
+                        },
                         ..Default::default()
                     })
-                    .insert(CloudBlock).id()
+                    .insert(CloudBlock)
+                    .id()
             };
-    
+
             self.blocks.push(block);
         }
     }
@@ -116,7 +124,10 @@ fn spawn_cloud(commands: &mut Commands, clouds_handler: &CloudsHandler, x: f32) 
     let y = rng.gen_range(CLOUDS_Y_RANGE[0]..=CLOUDS_Y_RANGE[1]);
 
     let mut cloud = CloudParent {
-        x, y, width_sprites: CLOUD_WIDTH as u32, blocks: Vec::new(),
+        x,
+        y,
+        width_sprites: CLOUD_WIDTH as u32,
+        blocks: Vec::new(),
     };
 
     cloud.spawn_blocks(commands, clouds_handler);
@@ -124,13 +135,11 @@ fn spawn_cloud(commands: &mut Commands, clouds_handler: &CloudsHandler, x: f32) 
     commands.spawn().insert(cloud);
 }
 
-
 pub struct CloudsPlugin;
 
 impl Plugin for CloudsPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<CloudsHandler>()
+        app.init_resource::<CloudsHandler>()
             .add_startup_system(clouds_setup)
             .add_system(clouds_system);
     }

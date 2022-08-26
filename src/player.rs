@@ -5,24 +5,24 @@ use crate::*;
 static JUMP_FORCE: f32 = 8.0;
 static GRAVITY: f32 = 0.4;
 
-
-fn player_setup(
-    mut commands: Commands,
-    player_handler: Res<PlayerHandler>,
-) {
-
+fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
     // Spawn the player
     let texture = &player_handler.texture;
-    commands.spawn().insert_bundle(SpriteBundle {
-        texture: texture.clone(),
-        transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, Z_PLAYER)),
-        sprite: Sprite {..Default::default()},
-        ..Default::default()
-    })
-    .insert(Player { delta_y: 0.0, dead: false });
-
+    commands
+        .spawn()
+        .insert_bundle(SpriteBundle {
+            texture: texture.clone(),
+            transform: Transform::from_translation(Vec3::new(PLAYER_X, PLAYER_START_Y, Z_PLAYER)),
+            sprite: Sprite {
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(Player {
+            delta_y: 0.0,
+            dead: false,
+        });
 }
-
 
 pub fn player_system(
     keyboard_input: Res<Input<KeyCode>>,
@@ -33,10 +33,9 @@ pub fn player_system(
     pipes_handler: Res<PipesHandler>,
     pkv: ResMut<PkvStore>,
 ) {
-    const MIN_ROTATION : f32 = -0.4;
-    const MAX_ROTATION : f32 = 0.4;
-    const ROTATION_SPEED : f32 = 0.05;
-
+    const MIN_ROTATION: f32 = -0.4;
+    const MAX_ROTATION: f32 = 0.4;
+    const ROTATION_SPEED: f32 = 0.05;
 
     // get the player
     let (mut player, mut transform) = query.single_mut();
@@ -62,32 +61,33 @@ pub fn player_system(
         if transform.rotation.z > MIN_ROTATION {
             transform.rotate_z(-ROTATION_SPEED);
         }
-    }
-    else {
+    } else {
         // idle animation
         if transform.translation.y > PLAYER_START_Y - 20.0 {
-            player.delta_y -= GRAVITY/4.0;
-        }
-        else {
-            player.delta_y += GRAVITY/2.0;
+            player.delta_y -= GRAVITY / 4.0;
+        } else {
+            player.delta_y += GRAVITY / 2.0;
         }
     }
 
     // check if player off screen
     if transform.translation.y < -SCREEN_Y_BOUNDARY || transform.translation.y > SCREEN_Y_BOUNDARY {
-
         player.dead = true;
     }
 
     // check if player dead
     if player.dead {
-
         // reset game
-        game_controller.reset_game(&mut commands, &mut player, &mut transform, &mut pipes_query, &pipes_handler, pkv);
+        game_controller.reset_game(
+            &mut commands,
+            &mut player,
+            &mut transform,
+            &mut pipes_query,
+            &pipes_handler,
+            pkv,
+        );
     }
-
 }
-
 
 // #[derive(Default)]
 struct PlayerHandler {
@@ -121,13 +121,11 @@ impl Player {
     }
 }
 
-
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<PlayerHandler>()
+        app.init_resource::<PlayerHandler>()
             .add_startup_system(player_setup)
             .add_system(player_system);
     }
