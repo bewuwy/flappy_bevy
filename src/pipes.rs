@@ -183,7 +183,7 @@ impl PipeParent {
 }
 
 
-pub fn spawn_pipe(mut commands: &mut Commands, pipes_handler: &PipesHandler, x: f32) {
+pub fn spawn_pipe(commands: &mut Commands, pipes_handler: &PipesHandler, x: f32) {
     let mut rng = thread_rng();
     let height = rng.gen_range(PIPE_HEIGHT_RANGE_SPR[0]..=PIPE_HEIGHT_RANGE_SPR[1]);
 
@@ -199,7 +199,7 @@ pub fn spawn_pipe(mut commands: &mut Commands, pipes_handler: &PipesHandler, x: 
     };
 
     // spawn pipe blocks
-    pipe.spawn_blocks(&mut commands, pipes_handler);
+    pipe.spawn_blocks(commands, pipes_handler);
 
     // spawn pipe parent
     commands.spawn().insert(pipe);

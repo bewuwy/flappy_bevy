@@ -70,7 +70,7 @@ struct CloudParent {
 struct CloudBlock;
 
 impl CloudParent {
-    fn reset(&mut self, mut commands: &mut Commands, clouds_handler: &CloudsHandler) {
+    fn reset(&mut self, commands: &mut Commands, clouds_handler: &CloudsHandler) {
         for block in self.blocks.iter() {
             commands.entity(*block).despawn();
         }
@@ -80,7 +80,7 @@ impl CloudParent {
         let mut rng = thread_rng();
         self.y = rng.gen_range(CLOUDS_Y_RANGE[0]..=CLOUDS_Y_RANGE[1]);
 
-        self.spawn_blocks(&mut commands, &clouds_handler);
+        self.spawn_blocks(commands, clouds_handler);
     }
 
     fn spawn_blocks(&mut self, commands: &mut Commands, clouds_handler: &CloudsHandler) {
@@ -109,7 +109,7 @@ impl CloudParent {
     }
 }
 
-fn spawn_cloud(mut commands: &mut Commands, clouds_handler: &CloudsHandler, x: f32) {
+fn spawn_cloud(commands: &mut Commands, clouds_handler: &CloudsHandler, x: f32) {
     const CLOUD_WIDTH: usize = 2;
 
     let mut rng = thread_rng();
@@ -119,7 +119,7 @@ fn spawn_cloud(mut commands: &mut Commands, clouds_handler: &CloudsHandler, x: f
         x, y, width_sprites: CLOUD_WIDTH as u32, blocks: Vec::new(),
     };
 
-    cloud.spawn_blocks(&mut commands, &clouds_handler);
+    cloud.spawn_blocks(commands, clouds_handler);
 
     commands.spawn().insert(cloud);
 }

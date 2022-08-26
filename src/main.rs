@@ -1,7 +1,9 @@
+#![windows_subsystem = "windows"]
+
 use bevy::prelude::*;
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, Diagnostics};
 
-use bevy_framepace;
+// use bevy_framepace;
 use bevy_pkv::PkvStore;
 use serde::{Deserialize, Serialize};
 
@@ -55,7 +57,7 @@ fn setup(
 
     // Load saved data
     let stats: PlayerStatistics = pkv.get::<PlayerStatistics>(PLAYER_STATS_KEY)
-    .unwrap_or_else(|_| PlayerStatistics {
+    .unwrap_or(PlayerStatistics {
         high_score: 0,
     });
 
@@ -77,9 +79,9 @@ pub struct GameController {
 impl GameController {
     pub fn reset_game(
         &mut self, 
-        mut commands: &mut Commands, 
+        commands: &mut Commands, 
         player: &mut Player, 
-        mut player_transform: &mut Transform, 
+        player_transform: &mut Transform, 
         pipes_query: &mut Query<&mut PipeParent>,
         pipes_handler: &PipesHandler, 
         mut pkv: ResMut<PkvStore>,
@@ -96,11 +98,11 @@ impl GameController {
 
         self.score = 0;
 
-        player.die(&mut player_transform);
+        player.die(player_transform);
 
         let mut i = 0.0;
         for mut pipe in pipes_query.iter_mut() {
-            pipe.reset(&mut commands, &pipes_handler, PIPES_START_X + i * PIPES_GAP_BETWEEN);
+            pipe.reset(commands, pipes_handler, PIPES_START_X + i * PIPES_GAP_BETWEEN);
 
             i += 1.0;
         }
