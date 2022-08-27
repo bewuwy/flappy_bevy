@@ -4,7 +4,6 @@ use bevy::diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 
 // use bevy_framepace;
-use bevy_kira_audio::prelude::*;
 use bevy_pkv::PkvStore;
 use serde::{Deserialize, Serialize};
 
@@ -12,19 +11,20 @@ mod clouds;
 mod options;
 mod pipes;
 mod player;
+mod sound;
 mod ui;
+mod window;
 
 use clouds::*;
 use options::*;
 use pipes::*;
 use player::*;
-use ui::*;
 
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
             title: GAME_NAME.to_string(),
-            ..Default::default()
+            ..default()
         })
         .insert_resource(ClearColor(Color::rgb(
             BACKGROUND_COLOR[0] / 255.0,
@@ -42,12 +42,13 @@ fn main() {
         .add_plugin(PlayerPlugin)
         .add_plugin(CloudsPlugin)
         // UI
-        .add_plugin(UIPlugin)
+        .add_plugin(ui::UIPlugin)
         // Saving plugin
         .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
         // Audio
-        .add_plugin(AudioPlugin)
-        .add_startup_system(start_background_audio)
+        .add_plugin(sound::SoundPlugin)
+        // Window
+        .add_plugin(window::WindowIconPlugin)
         .run();
 }
 
@@ -66,13 +67,6 @@ fn setup(mut commands: Commands, pkv: ResMut<PkvStore>) {
         score: 0,
         player_stats: stats,
     });
-}
-
-fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    audio
-        .play(asset_server.load("sounds/bg.wav"))
-        .with_volume(0.5)
-        .looped();
 }
 
 #[derive(Component)]
