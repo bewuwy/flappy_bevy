@@ -54,7 +54,7 @@ pub fn player_system(
         let rotation = MAX_ROTATION - transform.rotation.z;
         transform.rotate_z(rotation);
     }
-    
+
     // physics
     transform.translation.y += player.delta_y;
 
