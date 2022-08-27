@@ -4,6 +4,7 @@ use bevy::diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 
 // use bevy_framepace;
+use bevy_kira_audio::prelude::*;
 use bevy_pkv::PkvStore;
 use serde::{Deserialize, Serialize};
 
@@ -44,6 +45,9 @@ fn main() {
         .add_plugin(UIPlugin)
         // Saving plugin
         .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
+        // Audio
+        .add_plugin(AudioPlugin)
+        .add_startup_system(start_background_audio)
         .run();
 }
 
@@ -62,6 +66,13 @@ fn setup(mut commands: Commands, pkv: ResMut<PkvStore>) {
         score: 0,
         player_stats: stats,
     });
+}
+
+fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    audio
+        .play(asset_server.load("sounds/bg.wav"))
+        .with_volume(0.5)
+        .looped();
 }
 
 #[derive(Component)]
