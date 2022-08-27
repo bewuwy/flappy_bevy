@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-
 use rand::prelude::*;
 
 use crate::*;
+
+const CLOUDS_SPEED: f32 = 14.0;
 
 fn clouds_setup(
     mut commands: Commands,
@@ -27,9 +28,12 @@ fn clouds_system(
     mut block_query: Query<(&mut CloudBlock, &mut Transform)>,
     mut commands: Commands,
     clouds_manager: Res<CloudsHandler>,
+    time: Res<Time>,
 ) {
+    let delta_time: f32 = time.delta().as_secs_f32();
+
     for mut cloud in query.iter_mut() {
-        cloud.x += CLOUDS_SPEED;
+        cloud.x += CLOUDS_SPEED * delta_time;
 
         if cloud.x > SCREEN_X_BOUNDARY + cloud.width_sprites as f32 * SPRITE_SIZE {
             cloud.reset(&mut commands, &clouds_manager);
@@ -37,7 +41,7 @@ fn clouds_system(
     }
 
     for (_, mut transform) in block_query.iter_mut() {
-        transform.translation.x += CLOUDS_SPEED;
+        transform.translation.x += CLOUDS_SPEED * delta_time;
     }
 }
 

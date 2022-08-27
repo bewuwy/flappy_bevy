@@ -3,6 +3,8 @@ use rand::prelude::*;
 
 use crate::*;
 
+const PIPES_SPEED: f32 = 250.0;
+
 fn pipes_setup(mut commands: Commands, pipes_handler: Res<PipesHandler>) {
     const PIPES_NUMBER: u32 = 5;
 
@@ -23,7 +25,10 @@ pub fn pipes_system(
     mut controller_query: Query<&mut GameController>,
     mut commands: Commands,
     pipes_handler: Res<PipesHandler>,
+    time: Res<Time>,
 ) {
+    let delta_time: f32 = time.delta().as_secs_f32();
+
     // get the game controller
     let mut game_controller = controller_query.single_mut();
 
@@ -33,12 +38,12 @@ pub fn pipes_system(
     if game_controller.started {
         // update pipe blocks
         for (_, mut transform) in block_query.iter_mut() {
-            transform.translation.x -= PIPE_SPEED;
+            transform.translation.x -= PIPES_SPEED * delta_time;
         }
 
         // update pipes
         for mut pipe in pipes_query.iter_mut() {
-            pipe.x -= PIPE_SPEED;
+            pipe.x -= PIPES_SPEED * delta_time;
 
             // check if pipe off screen
             if pipe.x < -SCREEN_X_BOUNDARY {

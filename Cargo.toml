@@ -29,6 +29,7 @@ features = [
   "hdr",
   "x11",
   "filesystem_watcher",
+  "dynamic"
 ]
 
 [dependencies.bevy_kira_audio]

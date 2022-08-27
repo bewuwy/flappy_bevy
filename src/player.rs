@@ -2,8 +2,8 @@ use bevy::prelude::*;
 
 use crate::*;
 
-static JUMP_FORCE: f32 = 8.0;
-static GRAVITY: f32 = 0.4;
+static JUMP_FORCE: f32 = 10.0;
+static GRAVITY: f32 = 30.0;
 
 fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
     // Spawn the player
@@ -32,10 +32,13 @@ pub fn player_system(
     mut commands: Commands,
     pipes_handler: Res<PipesHandler>,
     pkv: ResMut<PkvStore>,
+    time: Res<Time>,
 ) {
     const MIN_ROTATION: f32 = -0.4;
-    const MAX_ROTATION: f32 = 0.4;
-    const ROTATION_SPEED: f32 = 0.05;
+    const MAX_ROTATION: f32 = 0.7;
+    const ROTATION_SPEED: f32 = 3.0;
+
+    let delta_time: f32 = time.delta().as_secs_f32();
 
     // get the player
     let (mut player, mut transform) = query.single_mut();
@@ -44,29 +47,29 @@ pub fn player_system(
     let mut game_controller = controller_query.single_mut();
 
     // input processing
-    if keyboard_input.pressed(KeyCode::Space) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
         player.delta_y = JUMP_FORCE;
         game_controller.started = true;
 
         let rotation = MAX_ROTATION - transform.rotation.z;
         transform.rotate_z(rotation);
     }
-
+    
     // physics
     transform.translation.y += player.delta_y;
 
     if game_controller.started {
-        player.delta_y -= GRAVITY;
+        player.delta_y -= GRAVITY * delta_time;
 
         if transform.rotation.z > MIN_ROTATION {
-            transform.rotate_z(-ROTATION_SPEED);
+            transform.rotate_z(-ROTATION_SPEED * delta_time);
         }
     } else {
         // idle animation
         if transform.translation.y > PLAYER_START_Y - 20.0 {
-            player.delta_y -= GRAVITY / 4.0;
+            player.delta_y -= GRAVITY * delta_time / 4.0;
         } else {
-            player.delta_y += GRAVITY / 2.0;
+            player.delta_y += GRAVITY * delta_time / 2.0;
         }
     }
 
