@@ -38,5 +38,6 @@ pub static CLOUDS_START_X: f32 = -SCREEN_X_BOUNDARY - SPRITE_SIZE * 3_f32;
 pub static CLOUDS_GAP_BETWEEN: f32 = 250.0;
 pub static CLOUDS_Y_RANGE: [f32; 2] = [-150.0, 300.0];
 
-// data storage
+// pkv data storage keys
 pub static PLAYER_STATS_KEY: &str = "player_stats";
+pub static GAME_SETTINGS_KEY: &str = "game_settings";

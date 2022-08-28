@@ -123,9 +123,7 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 ..Default::default()
             },
-            visibility: Visibility {
-                is_visible: false,
-            },
+            visibility: Visibility { is_visible: false },
             color: Color::rgba(0.0, 0.0, 0.0, 0.9).into(),
             ..Default::default()
         })
@@ -190,7 +188,8 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             },
                             color: Color::NONE.into(),
                             ..Default::default()
-                        }).with_children(|vol_title| {
+                        })
+                        .with_children(|vol_title| {
                             vol_title
                                 .spawn_bundle(TextBundle {
                                     text: Text::from_section(
@@ -229,7 +228,8 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             color: Color::RED.into(),
                             // material: asset_server.load("textures/minus.png").into(),
                             ..Default::default()
-                        }).with_children(|min_button| {
+                        })
+                        .with_children(|min_button| {
                             min_button
                                 .spawn_bundle(TextBundle {
                                     text: Text::from_section(
@@ -254,7 +254,8 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                             color: Color::GREEN.into(),
                             // material: asset_server.load("textures/plus.png").into(),
                             ..Default::default()
-                        }).with_children(|plus_button| {
+                        })
+                        .with_children(|plus_button| {
                             plus_button
                                 .spawn_bundle(TextBundle {
                                     text: Text::from_section(
@@ -271,7 +272,6 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         })
                         .insert(UiZ(33.0))
                         .insert(VolumePlusButton);
-
                 })
                 .insert(UiZ(31.0));
         })
@@ -298,10 +298,9 @@ struct ScoreText;
 
 fn score_text_system(
     mut query: Query<(&mut Text, With<ScoreText>)>,
-    game_controller_query: Query<&GameController>,
+    game_controller: Res<GameController>,
 ) {
     let (mut score_text, _) = query.single_mut();
-    let game_controller = game_controller_query.single();
 
     if game_controller.started {
         score_text.sections[0].value = game_controller.score.to_string();
@@ -316,10 +315,9 @@ struct StartText;
 
 fn start_text_system(
     mut query: Query<(&mut Text, With<StartText>)>,
-    game_controller_query: Query<&GameController>,
+    game_controller: Res<GameController>,
 ) {
     let (mut start_text, _) = query.single_mut();
-    let game_controller = game_controller_query.single();
 
     if game_controller.started {
         start_text.sections[0].value = "".to_string();
@@ -329,7 +327,7 @@ fn start_text_system(
 }
 
 #[derive(Component)]
-struct SettingsUI;  // TODO: pause game when settings are open
+struct SettingsUI; // TODO: pause game when settings are open
 
 fn settings_ui_system(
     keyboard_input: Res<Input<KeyCode>>,
@@ -338,10 +336,10 @@ fn settings_ui_system(
     vol_plus_query: Query<&Interaction, With<VolumePlusButton>>,
     mut vol_value_query: Query<&mut Text, With<VolumeValueText>>,
     audio: ResMut<Audio>,
-    mut gc_query: Query<&mut GameController>,
+    mut game_controller: ResMut<GameController>,
+    mut pkv: ResMut<PkvStore>,
 ) {
     let mut settings_visibility = query.single_mut();
-    let mut game_controller = gc_query.single_mut();
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
         settings_visibility.is_visible = !settings_visibility.is_visible;
@@ -354,27 +352,32 @@ fn settings_ui_system(
     let mut vol_changed = false;
 
     if vol_minus_interaction == &Interaction::Clicked {
-        game_controller.vol_level -= 0.01;
+        game_controller.settings.vol_level -= 0.01;
 
-        if game_controller.vol_level < 0.0 {
-            game_controller.vol_level = 0.0;
+        if game_controller.settings.vol_level < 0.0 {
+            game_controller.settings.vol_level = 0.0;
         }
         vol_changed = true;
     }
 
     if vol_plus_interaction == &Interaction::Clicked {
-        game_controller.vol_level += 0.01;
-    
-        if game_controller.vol_level > 1.0 {
-            game_controller.vol_level = 1.0;
+        game_controller.settings.vol_level += 0.01;
+
+        if game_controller.settings.vol_level > 1.0 {
+            game_controller.settings.vol_level = 1.0;
         }
         vol_changed = true;
     }
 
-    vol_value_text.sections[0].value = format!("{:.0}%", game_controller.vol_level * 100.0);
+    vol_value_text.sections[0].value =
+        format!("{:.0}%", game_controller.settings.vol_level * 100.0);
 
     if vol_changed {
-        audio.set_volume(game_controller.vol_level as f64);
+        audio.set_volume(game_controller.settings.vol_level as f64);
+
+        // update settings in pkv
+        pkv.set(GAME_SETTINGS_KEY, &game_controller.settings)
+            .expect("Failed to save game settings");
     }
 }
 

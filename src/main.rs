@@ -32,19 +32,20 @@ fn main() {
             BACKGROUND_COLOR[2] / 255.0,
         )))
         .add_plugins(DefaultPlugins)
+        // PKV data storage
+        .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
         // FPS
         .add_plugin(bevy_framepace::FramepacePlugin)
         .insert_resource(bevy_framepace::FramepaceSettings::default().with_warnings(false))
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // Game systems
+        .init_resource::<GameController>()
         .add_startup_system(setup)
         .add_plugin(PipesPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(CloudsPlugin)
         // UI
         .add_plugin(ui::UIPlugin)
-        // Saving plugin
-        .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
         // Audio
         .add_plugin(sound::SoundPlugin)
         // Window
@@ -52,30 +53,18 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, pkv: ResMut<PkvStore>) {
-    // Load saved data
-    let stats: PlayerStatistics = pkv
-        .get::<PlayerStatistics>(PLAYER_STATS_KEY)
-        .unwrap_or(PlayerStatistics { high_score: 0 });
-
+fn setup(mut commands: Commands) {
     // Add a 2D Camera
     commands.spawn_bundle(Camera2dBundle::default());
-
-    // Spawn the game controller
-    commands.spawn().insert(GameController {
-        started: false,
-        score: 0,
-        player_stats: stats,
-        vol_level: 0.5,
-    });
 }
 
-#[derive(Component)]
-pub struct GameController { //TODO: change to resource
+// #[derive(Default)]
+pub struct GameController {
+    //TODO: change to resource
     started: bool,
     score: u32,
     player_stats: PlayerStatistics,
-    vol_level: f32,
+    settings: GameSettings,
 }
 
 impl GameController {
@@ -115,7 +104,34 @@ impl GameController {
     }
 }
 
+impl FromWorld for GameController {
+    fn from_world(world: &mut World) -> Self {
+        let pkv = world.get_resource::<PkvStore>().unwrap();
+
+        // Load saved data
+        let player_stats: PlayerStatistics = pkv
+            .get::<PlayerStatistics>(PLAYER_STATS_KEY)
+            .unwrap_or(PlayerStatistics { high_score: 0 });
+
+        let settings: GameSettings = pkv
+            .get::<GameSettings>(GAME_SETTINGS_KEY)
+            .unwrap_or(GameSettings { vol_level: 0.5 });
+
+        GameController {
+            started: false,
+            score: 0,
+            player_stats,
+            settings,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct PlayerStatistics {
     high_score: u32,
+}
+
+#[derive(Serialize, Deserialize)]
+struct GameSettings {
+    vol_level: f32,
 }

@@ -1,10 +1,21 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
+use std::time::Duration;
 
-fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+use crate::GameController;
+
+fn start_background_audio(
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>,
+    game_controller: Res<GameController>,
+) {
     audio
         .play(asset_server.load("sounds/bg.wav"))
-        .with_volume(0.5)
+        .fade_in(AudioTween::new(
+            Duration::from_secs(1),
+            AudioEasing::OutPowi(2),
+        ))
+        .with_volume(game_controller.settings.vol_level as f64)
         .looped();
 }
 

@@ -27,7 +27,7 @@ fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
 pub fn player_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut Player, &mut Transform)>,
-    mut controller_query: Query<&mut GameController>,
+    mut game_controller: ResMut<GameController>,
     mut pipes_query: Query<&mut PipeParent>,
     mut commands: Commands,
     pipes_handler: Res<PipesHandler>,
@@ -42,9 +42,6 @@ pub fn player_system(
 
     // get the player
     let (mut player, mut transform) = query.single_mut();
-
-    // get the game controller
-    let mut game_controller = controller_query.single_mut();
 
     // input processing
     if keyboard_input.just_pressed(KeyCode::Space) {

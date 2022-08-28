@@ -22,15 +22,12 @@ pub fn pipes_system(
     mut player_query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
     mut block_query: Query<(&mut PipeBlock, &mut Transform), Without<Player>>,
-    mut controller_query: Query<&mut GameController>,
+    mut game_controller: ResMut<GameController>,
     mut commands: Commands,
     pipes_handler: Res<PipesHandler>,
     time: Res<Time>,
 ) {
     let delta_time: f32 = time.delta().as_secs_f32();
-
-    // get the game controller
-    let mut game_controller = controller_query.single_mut();
 
     // get the player and atlas handle
     let (mut player, player_transform) = player_query.single_mut();
