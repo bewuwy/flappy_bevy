@@ -25,14 +25,18 @@ fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
 }
 
 pub fn player_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Player, &mut Transform)>,
-    mut game_controller: ResMut<GameController>,
-    mut pipes_query: Query<&mut PipeParent>,
     mut commands: Commands,
+
+    mut query: Query<(&mut Player, &mut Transform)>,
+    mut pipes_query: Query<&mut PipeParent>,
+
+    (mut game_controller, pkv, time, keyboard_input): (
+        ResMut<GameController>,
+        ResMut<PkvStore>,
+        Res<Time>,
+        Res<Input<KeyCode>>,
+    ),
     pipes_handler: Res<PipesHandler>,
-    pkv: ResMut<PkvStore>,
-    time: Res<Time>,
 ) {
     const MIN_ROTATION: f32 = -0.4;
     const MAX_ROTATION: f32 = 0.7;

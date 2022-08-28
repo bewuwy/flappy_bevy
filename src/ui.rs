@@ -374,41 +374,41 @@ fn ui_setup(
                 .insert(UiZ(31.0));
 
             // close settings button
-            parent.spawn_bundle(ButtonBundle {
-                style: Style {
-                    size: Size::new(Val::Auto, Val::Auto),
-                    position_type: PositionType::Absolute,
-                    position: UiRect {
-                        top: Val::Px(0.0),
-                        right: Val::Px(0.0),
-                        ..Default::default()
+            parent
+                .spawn_bundle(ButtonBundle {
+                    style: Style {
+                        size: Size::new(Val::Auto, Val::Auto),
+                        position_type: PositionType::Absolute,
+                        position: UiRect {
+                            top: Val::Px(0.0),
+                            right: Val::Px(0.0),
+                            ..Default::default()
+                        },
+                        ..button_style.clone()
                     },
-                    ..button_style.clone()
-                },
-                color: Color::NONE.into(),
-                ..Default::default()
-            })
-            .with_children(|close_button| {
-                close_button
-                    .spawn_bundle(TextBundle {
-                        text: Text::from_section(
-                            "x",
-                            TextStyle {
-                                font: asset_server.load(FONT_PATH),
-                                font_size: 30.0,
-                                color: Color::WHITE,
-                            },
-                        ),
-                        ..Default::default()
-                    })
-                    .insert(UiZ(41.0));
-            })
-            .insert(UiZ(40.0))
-            .insert(SettingsButton {
-                just_clicked: true,
-                button_type: SettingsButtonType::Close,
-            });
-
+                    color: Color::NONE.into(),
+                    ..Default::default()
+                })
+                .with_children(|close_button| {
+                    close_button
+                        .spawn_bundle(TextBundle {
+                            text: Text::from_section(
+                                "x",
+                                TextStyle {
+                                    font: asset_server.load(FONT_PATH),
+                                    font_size: 30.0,
+                                    color: Color::WHITE,
+                                },
+                            ),
+                            ..Default::default()
+                        })
+                        .insert(UiZ(41.0));
+                })
+                .insert(UiZ(40.0))
+                .insert(SettingsButton {
+                    just_clicked: true,
+                    button_type: SettingsButtonType::Close,
+                });
         })
         .insert(SettingsUI)
         .insert(UiZ(30.0));
@@ -475,16 +475,19 @@ fn start_text_system(
 struct SettingsUI; // TODO: pause game when settings are open
 
 fn settings_ui_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Visibility, With<SettingsUI>>,
+    mut settings_visibility_query: Query<&mut Visibility, With<SettingsUI>>,
     mut settings_buttons_query: Query<(&Interaction, &Children, &mut SettingsButton)>,
     mut text_query: Query<&mut Text, Without<VolumeValueText>>, // todo: change this
     mut vol_value_query: Query<&mut Text, With<VolumeValueText>>,
-    audio: ResMut<Audio>,
-    mut game_controller: ResMut<GameController>,
-    mut pkv: ResMut<PkvStore>,
+
+    (mut game_controller, keyboard_input, mut pkv, audio): (
+        ResMut<GameController>,
+        Res<Input<KeyCode>>,
+        ResMut<PkvStore>,
+        Res<Audio>,
+    ),
 ) {
-    let mut settings_visibility = query.single_mut();
+    let mut settings_visibility = settings_visibility_query.single_mut();
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
         settings_visibility.is_visible = !settings_visibility.is_visible;
@@ -588,6 +591,7 @@ impl Plugin for UiZPlugin {
     }
 }
 
+#[allow(clippy::type_complexity)]
 fn update_uiz(mut query: Query<(&UiZ, &mut GlobalTransform), (With<Node>, Changed<Transform>)>) {
     for (uiz, mut transform) in query.iter_mut() {
         let translation = transform.translation_mut();
