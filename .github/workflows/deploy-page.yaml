@@ -1,6 +1,7 @@
 name: release-gh-pages
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "*"
