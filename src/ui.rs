@@ -245,7 +245,7 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 .insert(UiZ(33.0));
                         })
                         .insert(UiZ(33.0))
-                        .insert(VolumeMinusButton);
+                        .insert(VolumeMinusButton { just_clicked: true });
 
                     // volume plus button
                     vol_parent
@@ -271,7 +271,7 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 .insert(UiZ(33.0));
                         })
                         .insert(UiZ(33.0))
-                        .insert(VolumePlusButton);
+                        .insert(VolumePlusButton { just_clicked: true });
                 })
                 .insert(UiZ(31.0));
         })
@@ -332,8 +332,8 @@ struct SettingsUI; // TODO: pause game when settings are open
 fn settings_ui_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut Visibility, With<SettingsUI>>,
-    vol_minus_query: Query<&Interaction, With<VolumeMinusButton>>,
-    vol_plus_query: Query<&Interaction, With<VolumePlusButton>>,
+    mut vol_minus_query: Query<(&Interaction, &mut VolumeMinusButton)>,
+    mut vol_plus_query: Query<(&Interaction, &mut VolumePlusButton)>,
     mut vol_value_query: Query<&mut Text, With<VolumeValueText>>,
     audio: ResMut<Audio>,
     mut game_controller: ResMut<GameController>,
@@ -346,27 +346,33 @@ fn settings_ui_system(
     }
 
     // volume setting system
-    let vol_minus_interaction = vol_minus_query.single();
-    let vol_plus_interaction = vol_plus_query.single();
+    let (vol_minus_interaction, mut vol_minus) = vol_minus_query.single_mut();
+    let (vol_plus_interaction, mut vol_plus) = vol_plus_query.single_mut();
     let mut vol_value_text = vol_value_query.single_mut();
     let mut vol_changed = false;
 
-    if vol_minus_interaction == &Interaction::Clicked {
-        game_controller.settings.vol_level -= 0.01;
+    if vol_minus_interaction == &Interaction::Clicked && vol_minus.just_clicked {
+        game_controller.settings.vol_level -= 0.05;
 
         if game_controller.settings.vol_level < 0.0 {
             game_controller.settings.vol_level = 0.0;
         }
         vol_changed = true;
+        vol_minus.just_clicked = false;
+    } else if vol_minus_interaction != &Interaction::Clicked {
+        vol_minus.just_clicked = true;
     }
 
-    if vol_plus_interaction == &Interaction::Clicked {
-        game_controller.settings.vol_level += 0.01;
+    if vol_plus_interaction == &Interaction::Clicked && vol_plus.just_clicked {
+        game_controller.settings.vol_level += 0.05;
 
         if game_controller.settings.vol_level > 1.0 {
             game_controller.settings.vol_level = 1.0;
         }
         vol_changed = true;
+        vol_plus.just_clicked = false;
+    } else if vol_plus_interaction != &Interaction::Clicked {
+        vol_plus.just_clicked = true;
     }
 
     vol_value_text.sections[0].value =
@@ -382,10 +388,14 @@ fn settings_ui_system(
 }
 
 #[derive(Component)]
-struct VolumeMinusButton;
+struct VolumeMinusButton {
+    just_clicked: bool,
+}
 
 #[derive(Component)]
-struct VolumePlusButton;
+struct VolumePlusButton {
+    just_clicked: bool,
+}
 
 #[derive(Component)]
 struct VolumeValueText;
