@@ -3,7 +3,11 @@ use bevy_kira_audio::prelude::*;
 
 use crate::*;
 
-fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn ui_setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    game_controller: Res<GameController>,
+) {
     const FONT_PATH: &str = "fonts/font.ttf";
 
     // style
@@ -12,8 +16,8 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         justify_content: JustifyContent::Center,
         align_items: AlignItems::Center,
         padding: UiRect {
-            left: Val::Px(20.0),
-            right: Val::Px(20.0),
+            left: Val::Px(10.0),
+            right: Val::Px(10.0),
             ..Default::default()
         },
         ..Default::default()
@@ -128,7 +132,7 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..Default::default()
         })
         .with_children(|parent| {
-            // title
+            // settings title
             parent
                 .spawn_bundle(NodeBundle {
                     style: Style {
@@ -169,6 +173,10 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         justify_content: JustifyContent::FlexEnd,
                         align_items: AlignItems::Center,
                         flex_direction: FlexDirection::Row,
+                        margin: UiRect {
+                            bottom: Val::Percent(2.0),
+                            ..Default::default()
+                        },
                         ..Default::default()
                     },
                     color: Color::NONE.into(),
@@ -225,7 +233,7 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: Color::RED.into(),
+                            color: Color::NONE.into(),
                             // material: asset_server.load("textures/minus.png").into(),
                             ..Default::default()
                         })
@@ -245,13 +253,16 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 .insert(UiZ(33.0));
                         })
                         .insert(UiZ(33.0))
-                        .insert(VolumeMinusButton { just_clicked: true });
+                        .insert(SettingsButton {
+                            just_clicked: true,
+                            button_type: SettingsButtonType::VolumeMinus,
+                        });
 
                     // volume plus button
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: Color::GREEN.into(),
+                            color: Color::NONE.into(),
                             // material: asset_server.load("textures/plus.png").into(),
                             ..Default::default()
                         })
@@ -271,9 +282,133 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 .insert(UiZ(33.0));
                         })
                         .insert(UiZ(33.0))
-                        .insert(VolumePlusButton { just_clicked: true });
+                        .insert(SettingsButton {
+                            just_clicked: true,
+                            button_type: SettingsButtonType::VolumePlus,
+                        });
                 })
                 .insert(UiZ(31.0));
+
+            // show fps setting
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Percent(100.0), Val::Auto),
+                        justify_content: JustifyContent::FlexEnd,
+                        align_items: AlignItems::Center,
+                        flex_direction: FlexDirection::Row,
+                        margin: UiRect {
+                            bottom: Val::Percent(2.0),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    },
+                    color: Color::NONE.into(),
+                    ..Default::default()
+                })
+                .with_children(|vol_parent| {
+                    // fps show title
+                    vol_parent
+                        .spawn_bundle(NodeBundle {
+                            style: Style {
+                                justify_content: JustifyContent::FlexStart,
+                                margin: UiRect {
+                                    right: Val::Auto,
+                                    ..Default::default()
+                                },
+                                ..Default::default()
+                            },
+                            color: Color::NONE.into(),
+                            ..Default::default()
+                        })
+                        .with_children(|vol_title| {
+                            vol_title
+                                .spawn_bundle(TextBundle {
+                                    text: Text::from_section(
+                                        "Show FPS",
+                                        TextStyle {
+                                            font: asset_server.load(FONT_PATH),
+                                            font_size: 30.0,
+                                            color: Color::WHITE,
+                                        },
+                                    ),
+                                    ..Default::default()
+                                })
+                                .insert(UiZ(33.0));
+                        });
+
+                    // fps show toggle button
+                    vol_parent
+                        .spawn_bundle(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Px(100.0), Val::Percent(100.0)),
+                                ..button_style.clone()
+                            },
+                            color: Color::rgba(0.0, 0.0, 0.0, 0.0).into(),
+                            ..Default::default()
+                        })
+                        .with_children(|plus_button| {
+                            plus_button
+                                .spawn_bundle(TextBundle {
+                                    text: Text::from_section(
+                                        match game_controller.settings.show_fps {
+                                            true => "On".to_string(),
+                                            false => "Off".to_string(),
+                                        },
+                                        TextStyle {
+                                            font: asset_server.load(FONT_PATH),
+                                            font_size: 30.0,
+                                            color: Color::WHITE,
+                                        },
+                                    ),
+                                    ..Default::default()
+                                })
+                                .insert(UiZ(33.0));
+                        })
+                        .insert(UiZ(33.0))
+                        .insert(SettingsButton {
+                            just_clicked: true,
+                            button_type: SettingsButtonType::FPSShow,
+                        });
+                })
+                .insert(UiZ(31.0));
+
+            // close settings button
+            parent.spawn_bundle(ButtonBundle {
+                style: Style {
+                    size: Size::new(Val::Auto, Val::Auto),
+                    position_type: PositionType::Absolute,
+                    position: UiRect {
+                        top: Val::Px(0.0),
+                        right: Val::Px(0.0),
+                        ..Default::default()
+                    },
+                    ..button_style.clone()
+                },
+                color: Color::NONE.into(),
+                ..Default::default()
+            })
+            .with_children(|close_button| {
+                close_button
+                    .spawn_bundle(TextBundle {
+                        text: Text::from_section(
+                            "x",
+                            TextStyle {
+                                font: asset_server.load(FONT_PATH),
+                                font_size: 30.0,
+                                color: Color::WHITE,
+                            },
+                        ),
+                        ..Default::default()
+                    })
+                    .insert(UiZ(41.0));
+            })
+            .insert(UiZ(40.0))
+            .insert(SettingsButton {
+                just_clicked: true,
+                button_type: SettingsButtonType::Close,
+            });
+
         })
         .insert(SettingsUI)
         .insert(UiZ(30.0));
@@ -282,14 +417,24 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 #[derive(Component)]
 struct FPSText;
 
-fn fps_system(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text, With<FPSText>>) {
-    for mut text in &mut query {
+fn fps_system(
+    diagnostics: Res<Diagnostics>,
+    mut query: Query<(&mut Text, &mut Visibility), With<FPSText>>,
+    game_controller: Res<GameController>,
+) {
+    let (mut fps_text, mut fps_visibility) = query.single_mut();
+
+    if game_controller.settings.show_fps {
+        fps_visibility.is_visible = true;
+
         if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(average) = fps.average() {
                 // Update the value of the second section
-                text.sections[1].value = format!("{average:.2}");
+                fps_text.sections[1].value = format!("{average:.2}");
             }
         }
+    } else {
+        fps_visibility.is_visible = false;
     }
 }
 
@@ -332,8 +477,8 @@ struct SettingsUI; // TODO: pause game when settings are open
 fn settings_ui_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<&mut Visibility, With<SettingsUI>>,
-    mut vol_minus_query: Query<(&Interaction, &mut VolumeMinusButton)>,
-    mut vol_plus_query: Query<(&Interaction, &mut VolumePlusButton)>,
+    mut settings_buttons_query: Query<(&Interaction, &Children, &mut SettingsButton)>,
+    mut text_query: Query<&mut Text, Without<VolumeValueText>>, // todo: change this
     mut vol_value_query: Query<&mut Text, With<VolumeValueText>>,
     audio: ResMut<Audio>,
     mut game_controller: ResMut<GameController>,
@@ -346,40 +491,54 @@ fn settings_ui_system(
     }
 
     // volume setting system
-    let (vol_minus_interaction, mut vol_minus) = vol_minus_query.single_mut();
-    let (vol_plus_interaction, mut vol_plus) = vol_plus_query.single_mut();
     let mut vol_value_text = vol_value_query.single_mut();
-    let mut vol_changed = false;
 
-    if vol_minus_interaction == &Interaction::Clicked && vol_minus.just_clicked {
-        game_controller.settings.vol_level -= 0.05;
+    let mut changed = false;
 
-        if game_controller.settings.vol_level < 0.0 {
-            game_controller.settings.vol_level = 0.0;
+    for (interaction, children, mut button) in settings_buttons_query.iter_mut() {
+        if interaction == &Interaction::Clicked && button.just_clicked {
+            button.just_clicked = false;
+            changed = true;
+
+            match button.button_type {
+                SettingsButtonType::VolumeMinus => {
+                    game_controller.settings.vol_level -= 0.05;
+
+                    if game_controller.settings.vol_level < 0.0 {
+                        game_controller.settings.vol_level = 0.0;
+                    }
+                }
+                SettingsButtonType::VolumePlus => {
+                    game_controller.settings.vol_level += 0.05;
+
+                    if game_controller.settings.vol_level > 1.0 {
+                        game_controller.settings.vol_level = 1.0;
+                    }
+                }
+                SettingsButtonType::FPSShow => {
+                    game_controller.settings.show_fps = !game_controller.settings.show_fps;
+
+                    // change button text
+                    text_query.get_mut(children[0]).unwrap().sections[0].value =
+                        match game_controller.settings.show_fps {
+                            true => "On".to_string(),
+                            false => "Off".to_string(),
+                        }
+                }
+                SettingsButtonType::Close => {
+                    settings_visibility.is_visible = !settings_visibility.is_visible;
+                }
+            }
+        } else if interaction != &Interaction::Clicked {
+            button.just_clicked = true;
         }
-        vol_changed = true;
-        vol_minus.just_clicked = false;
-    } else if vol_minus_interaction != &Interaction::Clicked {
-        vol_minus.just_clicked = true;
-    }
-
-    if vol_plus_interaction == &Interaction::Clicked && vol_plus.just_clicked {
-        game_controller.settings.vol_level += 0.05;
-
-        if game_controller.settings.vol_level > 1.0 {
-            game_controller.settings.vol_level = 1.0;
-        }
-        vol_changed = true;
-        vol_plus.just_clicked = false;
-    } else if vol_plus_interaction != &Interaction::Clicked {
-        vol_plus.just_clicked = true;
     }
 
     vol_value_text.sections[0].value =
         format!("{:.0}%", game_controller.settings.vol_level * 100.0);
 
-    if vol_changed {
-        audio.set_volume(game_controller.settings.vol_level as f64);
+    if changed {
+        audio.set_volume(game_controller.settings.vol_level);
 
         // update settings in pkv
         pkv.set(GAME_SETTINGS_KEY, &game_controller.settings)
@@ -388,13 +547,16 @@ fn settings_ui_system(
 }
 
 #[derive(Component)]
-struct VolumeMinusButton {
+struct SettingsButton {
     just_clicked: bool,
+    button_type: SettingsButtonType,
 }
 
-#[derive(Component)]
-struct VolumePlusButton {
-    just_clicked: bool,
+enum SettingsButtonType {
+    VolumeMinus,
+    VolumePlus,
+    FPSShow,
+    Close,
 }
 
 #[derive(Component)]

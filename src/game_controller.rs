@@ -56,9 +56,11 @@ impl FromWorld for GameController {
             .get::<PlayerStatistics>(PLAYER_STATS_KEY)
             .unwrap_or(PlayerStatistics { high_score: 0 });
 
-        let settings: GameSettings = pkv
-            .get::<GameSettings>(GAME_SETTINGS_KEY)
-            .unwrap_or(GameSettings { vol_level: 0.5 });
+        let settings: GameSettings =
+            pkv.get::<GameSettings>(GAME_SETTINGS_KEY)
+                .unwrap_or(GameSettings {
+                    ..Default::default()
+                });
 
         GameController {
             started: false,
@@ -77,4 +79,14 @@ pub struct PlayerStatistics {
 #[derive(Serialize, Deserialize)]
 pub struct GameSettings {
     pub vol_level: f64,
+    pub show_fps: bool,
+}
+
+impl Default for GameSettings {
+    fn default() -> Self {
+        GameSettings {
+            vol_level: 0.5,
+            show_fps: false,
+        }
+    }
 }

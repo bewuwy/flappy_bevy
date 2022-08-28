@@ -1,7 +1,10 @@
 #![windows_subsystem = "windows"]
 
-use bevy::diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin};
-use bevy::prelude::*;
+use bevy::{
+    diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
+    prelude::*,
+    //?? winit::WinitSettings,
+};
 
 // use bevy_framepace;
 use bevy_pkv::PkvStore;
@@ -27,6 +30,7 @@ fn main() {
             title: GAME_NAME.to_string(),
             ..default()
         })
+        // .insert_resource(WinitSettings::desktop_app()) //? this breaks the game??
         .insert_resource(ClearColor(Color::rgb(
             BACKGROUND_COLOR[0] / 255.0,
             BACKGROUND_COLOR[1] / 255.0,
