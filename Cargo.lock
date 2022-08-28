@@ -360,7 +360,6 @@ name = "bevy_flappy_bird"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_framepace",
  "bevy_kira_audio",
  "bevy_pkv",
  "image",
@@ -368,16 +367,6 @@ dependencies = [
  "serde",
  "winit",
  "winres",
-]
-
-[[package]]
-name = "bevy_framepace"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34baf30ce11dde78acfd8384be68db8f411fd97791dbf17c45e99af4661de4d7"
-dependencies = [
- "bevy",
- "spin_sleep",
 ]
 
 [[package]]
@@ -3038,16 +3027,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f6002a767bff9e83f8eeecf883ecb8011875a21ae8da43bffb817a57e78cc09"
 dependencies = [
  "lock_api",
-]
-
-[[package]]
-name = "spin_sleep"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cafa7900db085f4354dbc7025e25d7a839a14360ea13b5fc4fd717f2d3b23134"
-dependencies = [
- "once_cell",
- "winapi",
 ]
 
 [[package]]

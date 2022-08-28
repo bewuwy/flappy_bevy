@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::*;
+use crate::options::*;
 
 const CLOUDS_SPEED: f32 = 14.0;
 

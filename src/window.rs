@@ -29,6 +29,7 @@ pub struct WindowIconPlugin;
 
 impl Plugin for WindowIconPlugin {
     fn build(&self, app: &mut App) {
+        #[cfg(not(target_arch = "wasm32"))]
         app.add_startup_system(set_window_icon);
     }
 }
