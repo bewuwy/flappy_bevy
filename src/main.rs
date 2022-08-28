@@ -66,14 +66,16 @@ fn setup(mut commands: Commands, pkv: ResMut<PkvStore>) {
         started: false,
         score: 0,
         player_stats: stats,
+        vol_level: 0.5,
     });
 }
 
 #[derive(Component)]
-pub struct GameController {
+pub struct GameController { //TODO: change to resource
     started: bool,
     score: u32,
     player_stats: PlayerStatistics,
+    vol_level: f32,
 }
 
 impl GameController {

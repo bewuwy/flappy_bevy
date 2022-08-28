@@ -7,6 +7,7 @@ pub static BACKGROUND_COLOR: [f32; 3] = [87.0, 169.0, 241.0]; // 124.0, 182.0, 2
 pub static Z_PLAYER: f32 = 10.0;
 pub static Z_PIPE: f32 = 5.0;
 pub static Z_BACKGROUND: f32 = 2.0;
+// pub static Z_SETTINGS: f32 = 30.0;
 // pub static Z_UI: f32 = 20.0;
 
 // spritesheet settings
