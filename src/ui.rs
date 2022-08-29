@@ -12,9 +12,12 @@ fn ui_setup(
 ) {
     const FONT_PATH: &str = "fonts/font.ttf";
 
-    let button_color: UiColor = Color::NONE.into();
+    // texts
+    const AUDIO_SECTION: &str = "Audio";
+    const DEBUG_SECTION: &str = "Debug";
 
     // style
+    let button_color: UiColor = Color::NONE.into();
     let button_style: Style = Style {
         size: Size::new(Val::Auto, Val::Percent(100.0)),
         justify_content: JustifyContent::Center,
@@ -26,11 +29,6 @@ fn ui_setup(
         },
         ..Default::default()
     };
-
-    // texts
-    const AUDIO_SECTION: &str = "Audio";
-    const VOLUME_TITLE: &str = "Music volume";
-    const DEBUG_SECTION: &str = "Debug";
 
     // text ui
     commands
@@ -135,7 +133,8 @@ fn ui_setup(
                     left: Val::Px(10.0),
                     right: Val::Px(10.0),
                     bottom: Val::Px(10.0),
-                    ..Default::default()
+                    top: Val::Percent(2.0),
+                    // ..Default::default()
                 },
                 ..Default::default()
             },
@@ -145,37 +144,15 @@ fn ui_setup(
         })
         .with_children(|parent| {
             // settings title
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Auto),
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        margin: UiRect {
-                            top: Val::Percent(2.0),
-                            bottom: Val::Percent(2.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    },
-                    color: Color::NONE.into(),
-                    ..Default::default()
-                })
-                .with_children(|title_parent| {
-                    title_parent
-                        .spawn_bundle(TextBundle {
-                            text: Text::from_section(
-                                "Settings",
-                                TextStyle {
-                                    font: asset_server.load(FONT_PATH),
-                                    font_size: 50.0,
-                                    color: Color::WHITE,
-                                },
-                            ),
-                            ..Default::default()
-                        })
-                        .insert(UiZ(31.0));
-                });
+            SectionHeader::from_title(
+                parent,
+                "Settings",
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 50.0,
+                    color: Color::WHITE,
+                },
+            );
 
             // audio settings section
             SectionHeader::from_title(
@@ -189,128 +166,20 @@ fn ui_setup(
             );
 
             // volume setting
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Auto),
-                        justify_content: JustifyContent::FlexEnd,
-                        align_items: AlignItems::Center,
-                        flex_direction: FlexDirection::Row,
-                        margin: UiRect {
-                            bottom: Val::Percent(2.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    },
-                    color: Color::NONE.into(),
-                    ..Default::default()
-                })
-                .with_children(|vol_parent| {
-                    // volume title
-                    vol_parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                justify_content: JustifyContent::FlexStart,
-                                margin: UiRect {
-                                    right: Val::Auto,
-                                    ..Default::default()
-                                },
-                                ..Default::default()
-                            },
-                            color: Color::NONE.into(),
-                            ..Default::default()
-                        })
-                        .with_children(|vol_title| {
-                            vol_title
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        VOLUME_TITLE,
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(33.0));
-                        });
-
-                    // volume level text
-                    vol_parent
-                        .spawn_bundle(TextBundle {
-                            text: Text::from_section(
-                                "50%",
-                                TextStyle {
-                                    font: asset_server.load(FONT_PATH),
-                                    font_size: 30.0,
-                                    color: Color::WHITE,
-                                },
-                            ),
-                            ..Default::default()
-                        })
-                        .insert(UiZ(32.0))
-                        .insert(VolumeValueText);
-
-                    // volume minus button
-                    vol_parent
-                        .spawn_bundle(ButtonBundle {
-                            style: button_style.clone(),
-                            color: button_color,
-                            // material: asset_server.load("textures/minus.png").into(),
-                            ..Default::default()
-                        })
-                        .with_children(|min_button| {
-                            min_button
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        "-",
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(34.0));
-                        })
-                        .insert(UiZ(33.0))
-                        .insert(SettingsButton {
-                            just_clicked: true,
-                            button_type: SettingsButtonType::VolumeMinus,
-                        });
-
-                    // volume plus button
-                    vol_parent
-                        .spawn_bundle(ButtonBundle {
-                            style: button_style.clone(),
-                            color: button_color,
-                            // material: asset_server.load("textures/plus.png").into(),
-                            ..Default::default()
-                        })
-                        .with_children(|plus_button| {
-                            plus_button
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        "+",
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(34.0));
-                        })
-                        .insert(UiZ(33.0))
-                        .insert(SettingsButton {
-                            just_clicked: true,
-                            button_type: SettingsButtonType::VolumePlus,
-                        });
-                })
-                .insert(UiZ(31.0));
+            SettingsElement::create(
+                parent,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+                "Music volume",
+                &[
+                    (SettingsButtonType::VolumeMinus, "-"),
+                    (SettingsButtonType::VolumePlus, "+"),
+                ],
+                Some(SettingValueType::Volume),
+            );
 
             // debug settings section
             SectionHeader::from_title(
@@ -324,169 +193,36 @@ fn ui_setup(
             );
 
             // show fps setting
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Auto),
-                        justify_content: JustifyContent::FlexEnd,
-                        align_items: AlignItems::Center,
-                        flex_direction: FlexDirection::Row,
-                        margin: UiRect {
-                            // bottom: Val::Percent(2.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
+            SettingsElement::create(
+                parent,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+                "Show FPS",
+                &[(
+                    SettingsButtonType::FPSShow,
+                    match game_controller.settings.show_fps {
+                        true => "On",
+                        false => "Off",
                     },
-                    color: Color::NONE.into(),
-                    ..Default::default()
-                })
-                .with_children(|fps_show_parent| {
-                    // fps show title
-                    fps_show_parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                justify_content: JustifyContent::FlexStart,
-                                margin: UiRect {
-                                    right: Val::Auto,
-                                    ..Default::default()
-                                },
-                                ..Default::default()
-                            },
-                            color: Color::NONE.into(),
-                            ..Default::default()
-                        })
-                        .with_children(|fps_show_title| {
-                            fps_show_title
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        "Show FPS",
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(33.0));
-                        });
-
-                    // fps show toggle button
-                    fps_show_parent
-                        .spawn_bundle(ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Auto, Val::Percent(100.0)),
-                                ..button_style.clone()
-                            },
-                            color: button_color,
-                            ..Default::default()
-                        })
-                        .with_children(|fps_button| {
-                            fps_button
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        match game_controller.settings.show_fps {
-                                            true => "On".to_string(),
-                                            false => "Off".to_string(),
-                                        },
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(34.0));
-                        })
-                        .insert(UiZ(33.0))
-                        .insert(SettingsButton {
-                            just_clicked: true,
-                            button_type: SettingsButtonType::FPSShow,
-                        });
-                })
-                .insert(UiZ(31.0));
+                )],
+                None,
+            );
 
             // reset highscore setting
-            parent
-                .spawn_bundle(NodeBundle {
-                    style: Style {
-                        size: Size::new(Val::Percent(100.0), Val::Auto),
-                        justify_content: JustifyContent::FlexEnd,
-                        align_items: AlignItems::Center,
-                        flex_direction: FlexDirection::Row,
-                        margin: UiRect {
-                            // bottom: Val::Percent(2.0),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    },
-                    color: Color::NONE.into(),
-                    ..Default::default()
-                })
-                .with_children(|reset_parent| {
-                    // reset title
-                    reset_parent
-                        .spawn_bundle(NodeBundle {
-                            style: Style {
-                                justify_content: JustifyContent::FlexStart,
-                                margin: UiRect {
-                                    right: Val::Auto,
-                                    ..Default::default()
-                                },
-                                ..Default::default()
-                            },
-                            color: Color::NONE.into(),
-                            ..Default::default()
-                        })
-                        .with_children(|reset_title| {
-                            reset_title
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        "Reset highscore",
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(33.0));
-                        });
-
-                    // reset button
-                    reset_parent
-                        .spawn_bundle(ButtonBundle {
-                            style: Style {
-                                size: Size::new(Val::Auto, Val::Percent(100.0)),
-                                ..button_style.clone()
-                            },
-                            color: button_color,
-                            ..Default::default()
-                        })
-                        .with_children(|reset_button| {
-                            reset_button
-                                .spawn_bundle(TextBundle {
-                                    text: Text::from_section(
-                                        "Reset",
-                                        TextStyle {
-                                            font: asset_server.load(FONT_PATH),
-                                            font_size: 30.0,
-                                            color: Color::WHITE,
-                                        },
-                                    ),
-                                    ..Default::default()
-                                })
-                                .insert(UiZ(34.0));
-                        })
-                        .insert(UiZ(33.0))
-                        .insert(SettingsButton {
-                            just_clicked: true,
-                            button_type: SettingsButtonType::Reset,
-                        });
-                })
-                .insert(UiZ(31.0));
+            SettingsElement::create(
+                parent,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+                "Reset Highscore",
+                &[(SettingsButtonType::Reset, "Reset")],
+                None,
+            );
 
             // close settings button
             parent
@@ -590,8 +326,8 @@ struct SettingsUI; // TODO: pause game when settings are open
 fn settings_ui_system(
     mut settings_visibility_query: Query<&mut Visibility, With<SettingsUI>>,
     mut settings_buttons_query: Query<(&Interaction, &Children, &mut SettingsButton)>,
-    mut text_query: Query<&mut Text, Without<VolumeValueText>>, // todo: change this
-    mut vol_value_query: Query<&mut Text, With<VolumeValueText>>,
+    mut text_query: Query<&mut Text, Without<SettingValueText>>, // todo: change this
+    mut value_query: Query<(&mut Text, &SettingValueText)>,
 
     (mut game_controller, keyboard_input, mut pkv, audio): (
         ResMut<GameController>,
@@ -602,7 +338,10 @@ fn settings_ui_system(
 ) {
     let mut settings_visibility = settings_visibility_query.single_mut();
 
-    if keyboard_input.just_pressed(KeyCode::Escape) {
+    fn close_settings(
+        mut settings_visibility: &mut Visibility,
+        mut game_controller: &mut GameController,
+    ) {
         settings_visibility.is_visible = !settings_visibility.is_visible;
 
         if settings_visibility.is_visible {
@@ -612,8 +351,9 @@ fn settings_ui_system(
         }
     }
 
-    // volume setting system
-    let mut vol_value_text = vol_value_query.single_mut();
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        close_settings(&mut settings_visibility, &mut game_controller);
+    }
 
     let mut changed = false;
 
@@ -648,7 +388,7 @@ fn settings_ui_system(
                         }
                 }
                 SettingsButtonType::Close => {
-                    settings_visibility.is_visible = !settings_visibility.is_visible;
+                    close_settings(&mut settings_visibility, &mut game_controller);
                 }
                 SettingsButtonType::Reset => {
                     game_controller.player_stats.high_score = 0;
@@ -660,8 +400,14 @@ fn settings_ui_system(
         }
     }
 
-    vol_value_text.sections[0].value =
-        format!("{:.0}%", game_controller.settings.vol_level * 100.0);
+    for (mut text, setting_value_text) in value_query.iter_mut() {
+        match setting_value_text.value_type {
+            SettingValueType::Volume => {
+                text.sections[0].value =
+                    format!("{:.0}%", game_controller.settings.vol_level * 100.0);
+            }
+        }
+    }
 
     if changed {
         audio.set_volume(game_controller.settings.vol_level);
@@ -672,12 +418,118 @@ fn settings_ui_system(
     }
 }
 
+struct SettingsElement;
+
+impl SettingsElement {
+    fn create(
+        parent: &mut ChildBuilder,
+        text_style: TextStyle,
+        title: &str,
+
+        buttons: &[(SettingsButtonType, &str)],
+        value_type_: Option<SettingValueType>,
+    ) {
+        // style
+        let button_color: UiColor = Color::NONE.into();
+        let button_style: Style = Style {
+            size: Size::new(Val::Auto, Val::Percent(100.0)),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            padding: UiRect {
+                left: Val::Px(10.0),
+                right: Val::Px(10.0),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        parent
+            .spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.0), Val::Auto),
+                    justify_content: JustifyContent::FlexEnd,
+                    align_items: AlignItems::Center,
+                    flex_direction: FlexDirection::Row,
+                    margin: UiRect {
+                        bottom: Val::Percent(2.0),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                color: Color::NONE.into(),
+                ..Default::default()
+            })
+            .with_children(|setting_parent| {
+                setting_parent
+                    .spawn_bundle(NodeBundle {
+                        style: Style {
+                            justify_content: JustifyContent::FlexStart,
+                            margin: UiRect {
+                                right: Val::Auto,
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
+                        color: Color::NONE.into(),
+                        ..Default::default()
+                    })
+                    .with_children(|setting_title| {
+                        setting_title
+                            .spawn_bundle(TextBundle {
+                                text: Text::from_section(title.to_string(), text_style.clone()),
+                                ..Default::default()
+                            })
+                            .insert(UiZ(33.0));
+                    });
+
+                // setting value
+                if let Some(value_type) = value_type_ {
+                    setting_parent
+                        .spawn_bundle(TextBundle {
+                            text: Text::from_section("", text_style.clone()),
+                            ..Default::default()
+                        })
+                        .insert(UiZ(32.0))
+                        .insert(SettingValueText { value_type });
+                }
+
+                // setting buttons
+                for (button_type, button_text) in buttons {
+                    setting_parent
+                        .spawn_bundle(ButtonBundle {
+                            style: button_style.clone(),
+                            color: button_color,
+                            ..Default::default()
+                        })
+                        .with_children(|setting_button| {
+                            setting_button
+                                .spawn_bundle(TextBundle {
+                                    text: Text::from_section(
+                                        button_text.to_string(),
+                                        text_style.clone(),
+                                    ),
+                                    ..Default::default()
+                                })
+                                .insert(UiZ(34.0));
+                        })
+                        .insert(UiZ(33.0))
+                        .insert(SettingsButton {
+                            just_clicked: true,
+                            button_type: *button_type,
+                        });
+                }
+            })
+            .insert(UiZ(31.0));
+    }
+}
+
 #[derive(Component)]
 struct SettingsButton {
     just_clicked: bool,
     button_type: SettingsButtonType,
 }
 
+#[derive(Clone, Copy)]
 enum SettingsButtonType {
     VolumeMinus,
     VolumePlus,
@@ -687,12 +539,18 @@ enum SettingsButtonType {
 }
 
 #[derive(Component)]
-struct VolumeValueText;
+struct SettingValueText {
+    value_type: SettingValueType,
+}
+
+enum SettingValueType {
+    Volume,
+}
 
 struct SectionHeader; // TODO: change to function
 
 impl SectionHeader {
-    pub fn from_title(parent: &mut ChildBuilder, title: &str, style: TextStyle) -> Self {
+    pub fn from_title(parent: &mut ChildBuilder, title: &str, style: TextStyle) {
         parent
             .spawn_bundle(NodeBundle {
                 style: Style {
@@ -713,8 +571,6 @@ impl SectionHeader {
                     })
                     .insert(UiZ(31.0));
             });
-
-        Self
     }
 }
 
