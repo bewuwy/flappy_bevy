@@ -10,6 +10,8 @@ fn ui_setup(
 ) {
     const FONT_PATH: &str = "fonts/font.ttf";
 
+    let button_color: UiColor = Color::NONE.into();
+
     // style
     let button_style: Style = Style {
         size: Size::new(Val::Auto, Val::Percent(100.0)),
@@ -233,7 +235,7 @@ fn ui_setup(
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: Color::NONE.into(),
+                            color: button_color.clone(),
                             // material: asset_server.load("textures/minus.png").into(),
                             ..Default::default()
                         })
@@ -250,7 +252,7 @@ fn ui_setup(
                                     ),
                                     ..Default::default()
                                 })
-                                .insert(UiZ(33.0));
+                                .insert(UiZ(34.0));
                         })
                         .insert(UiZ(33.0))
                         .insert(SettingsButton {
@@ -262,7 +264,7 @@ fn ui_setup(
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: Color::NONE.into(),
+                            color: button_color.clone(),
                             // material: asset_server.load("textures/plus.png").into(),
                             ..Default::default()
                         })
@@ -279,7 +281,7 @@ fn ui_setup(
                                     ),
                                     ..Default::default()
                                 })
-                                .insert(UiZ(33.0));
+                                .insert(UiZ(34.0));
                         })
                         .insert(UiZ(33.0))
                         .insert(SettingsButton {
@@ -298,7 +300,7 @@ fn ui_setup(
                         align_items: AlignItems::Center,
                         flex_direction: FlexDirection::Row,
                         margin: UiRect {
-                            bottom: Val::Percent(2.0),
+                            // bottom: Val::Percent(2.0),
                             ..Default::default()
                         },
                         ..Default::default()
@@ -306,9 +308,9 @@ fn ui_setup(
                     color: Color::NONE.into(),
                     ..Default::default()
                 })
-                .with_children(|vol_parent| {
+                .with_children(|fps_show_parent| {
                     // fps show title
-                    vol_parent
+                    fps_show_parent
                         .spawn_bundle(NodeBundle {
                             style: Style {
                                 justify_content: JustifyContent::FlexStart,
@@ -321,8 +323,8 @@ fn ui_setup(
                             color: Color::NONE.into(),
                             ..Default::default()
                         })
-                        .with_children(|vol_title| {
-                            vol_title
+                        .with_children(|fps_show_title| {
+                            fps_show_title
                                 .spawn_bundle(TextBundle {
                                     text: Text::from_section(
                                         "Show FPS",
@@ -338,17 +340,17 @@ fn ui_setup(
                         });
 
                     // fps show toggle button
-                    vol_parent
+                    fps_show_parent
                         .spawn_bundle(ButtonBundle {
                             style: Style {
-                                size: Size::new(Val::Px(100.0), Val::Percent(100.0)),
+                                size: Size::new(Val::Auto, Val::Percent(100.0)),
                                 ..button_style.clone()
                             },
-                            color: Color::rgba(0.0, 0.0, 0.0, 0.0).into(),
+                            color: button_color.clone(),
                             ..Default::default()
                         })
-                        .with_children(|plus_button| {
-                            plus_button
+                        .with_children(|fps_button| {
+                            fps_button
                                 .spawn_bundle(TextBundle {
                                     text: Text::from_section(
                                         match game_controller.settings.show_fps {
@@ -363,7 +365,7 @@ fn ui_setup(
                                     ),
                                     ..Default::default()
                                 })
-                                .insert(UiZ(33.0));
+                                .insert(UiZ(34.0));
                         })
                         .insert(UiZ(33.0))
                         .insert(SettingsButton {
@@ -386,7 +388,7 @@ fn ui_setup(
                         },
                         ..button_style.clone()
                     },
-                    color: Color::NONE.into(),
+                    color: button_color.clone(),
                     ..Default::default()
                 })
                 .with_children(|close_button| {
@@ -491,6 +493,10 @@ fn settings_ui_system(
 
     if keyboard_input.just_pressed(KeyCode::Escape) {
         settings_visibility.is_visible = !settings_visibility.is_visible;
+
+        if settings_visibility.is_visible {
+            game_controller.started = false;
+        }
     }
 
     // volume setting system
@@ -502,6 +508,8 @@ fn settings_ui_system(
         if interaction == &Interaction::Clicked && button.just_clicked {
             button.just_clicked = false;
             changed = true;
+
+            println!("{:?}", button.button_type);
 
             match button.button_type {
                 SettingsButtonType::VolumeMinus => {
@@ -555,6 +563,7 @@ struct SettingsButton {
     button_type: SettingsButtonType,
 }
 
+#[derive(Debug)]
 enum SettingsButtonType {
     VolumeMinus,
     VolumePlus,
