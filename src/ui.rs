@@ -407,6 +407,87 @@ fn ui_setup(
                 })
                 .insert(UiZ(31.0));
 
+            // reset highscore setting
+            parent
+                .spawn_bundle(NodeBundle {
+                    style: Style {
+                        size: Size::new(Val::Percent(100.0), Val::Auto),
+                        justify_content: JustifyContent::FlexEnd,
+                        align_items: AlignItems::Center,
+                        flex_direction: FlexDirection::Row,
+                        margin: UiRect {
+                            // bottom: Val::Percent(2.0),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    },
+                    color: Color::NONE.into(),
+                    ..Default::default()
+                })
+                .with_children(|reset_parent| {
+                    // reset title
+                    reset_parent
+                        .spawn_bundle(NodeBundle {
+                            style: Style {
+                                justify_content: JustifyContent::FlexStart,
+                                margin: UiRect {
+                                    right: Val::Auto,
+                                    ..Default::default()
+                                },
+                                ..Default::default()
+                            },
+                            color: Color::NONE.into(),
+                            ..Default::default()
+                        })
+                        .with_children(|reset_title| {
+                            reset_title
+                                .spawn_bundle(TextBundle {
+                                    text: Text::from_section(
+                                        "Reset highscore",
+                                        TextStyle {
+                                            font: asset_server.load(FONT_PATH),
+                                            font_size: 30.0,
+                                            color: Color::WHITE,
+                                        },
+                                    ),
+                                    ..Default::default()
+                                })
+                                .insert(UiZ(33.0));
+                        });
+
+                    // reset button
+                    reset_parent
+                        .spawn_bundle(ButtonBundle {
+                            style: Style {
+                                size: Size::new(Val::Auto, Val::Percent(100.0)),
+                                ..button_style.clone()
+                            },
+                            color: button_color,
+                            ..Default::default()
+                        })
+                        .with_children(|reset_button| {
+                            reset_button
+                                .spawn_bundle(TextBundle {
+                                    text: Text::from_section(
+                                        "Reset",
+                                        TextStyle {
+                                            font: asset_server.load(FONT_PATH),
+                                            font_size: 30.0,
+                                            color: Color::WHITE,
+                                        },
+                                    ),
+                                    ..Default::default()
+                                })
+                                .insert(UiZ(34.0));
+                        })
+                        .insert(UiZ(33.0))
+                        .insert(SettingsButton {
+                            just_clicked: true,
+                            button_type: SettingsButtonType::Reset,
+                        });
+                })
+                .insert(UiZ(31.0));
+
             // close settings button
             parent
                 .spawn_bundle(ButtonBundle {
@@ -569,6 +650,10 @@ fn settings_ui_system(
                 SettingsButtonType::Close => {
                     settings_visibility.is_visible = !settings_visibility.is_visible;
                 }
+                SettingsButtonType::Reset => {
+                    game_controller.player_stats.high_score = 0;
+                    game_controller.save_player_stats(&mut pkv)
+                }
             }
         } else if interaction != &Interaction::Clicked {
             button.just_clicked = true;
@@ -598,6 +683,7 @@ enum SettingsButtonType {
     VolumePlus,
     FPSShow,
     Close,
+    Reset,
 }
 
 #[derive(Component)]
