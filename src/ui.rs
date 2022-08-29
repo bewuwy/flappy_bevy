@@ -275,14 +275,14 @@ fn text_ui_system(
     for (mut text, mut visibility, ui_text) in query.iter_mut() {
         match ui_text.text_type {
             UiTextType::StartMessage => {
-                if game_controller.started {
+                if game_controller.has_game_started() {
                     visibility.is_visible = false;
                 } else {
                     visibility.is_visible = true;
                 }
             }
             UiTextType::Score => {
-                if game_controller.started {
+                if game_controller.has_game_started() {
                     text.sections[0].value = game_controller.score.to_string();
                 } else {
                     text.sections[0].value = format!(
@@ -340,14 +340,14 @@ fn settings_ui_system(
 
     fn close_settings(
         mut settings_visibility: &mut Visibility,
-        mut game_controller: &mut GameController,
+        game_controller: &mut GameController,
     ) {
         settings_visibility.is_visible = !settings_visibility.is_visible;
 
         if settings_visibility.is_visible {
-            game_controller.paused = true;
+            game_controller.pause_game();
         } else {
-            game_controller.paused = false;
+            game_controller.resume_game();
         }
     }
 

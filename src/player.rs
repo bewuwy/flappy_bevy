@@ -22,6 +22,7 @@ fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
         .insert(Player {
             delta_y: 0.0,
             dead: false,
+            animation: PlayerAnimation::Idle,
         });
 }
 
@@ -44,7 +45,7 @@ fn player_system(
     ),
 ) {
     const MIN_ROTATION: f32 = -0.4;
-    const MAX_ROTATION: f32 = 0.7;
+    const MAX_ROTATION: f32 = 0.4;
     const ROTATION_SPEED: f32 = 3.0;
 
     let delta_time: f32 = time.delta().as_secs_f32();
@@ -53,35 +54,57 @@ fn player_system(
     let (mut player, mut transform) = query.single_mut();
 
     // input processing
-    if keyboard_input.just_pressed(KeyCode::Space) && !game_controller.paused {
+    if keyboard_input.just_pressed(KeyCode::Space)
+        && (game_controller.is_game_running() || game_controller.is_game_waiting())
+    {
         player.delta_y = JUMP_FORCE;
-        game_controller.started = true;
+        game_controller.game_state = GameState::Started;
 
         // play the jump sound
         audio
             .play(player_handler.jump_sound.clone())
             .with_volume(0.25 * 0.5);
 
-        let rotation = MAX_ROTATION - transform.rotation.z;
-        transform.rotate_z(rotation);
+        // jump animation
+        player.animation = PlayerAnimation::Jump;
+    } else if keyboard_input.just_released(KeyCode::Space) {
+        // stop the jump animation
+        player.animation = PlayerAnimation::Fall;
     }
 
     if game_controller.is_game_running() {
+        // apply gravity
         player.delta_y -= GRAVITY * delta_time;
-
-        if transform.rotation.z > MIN_ROTATION {
-            transform.rotate_z(-ROTATION_SPEED * delta_time);
-        }
-    } else if !game_controller.paused {
+    } else if game_controller.is_game_waiting() {
         // idle animation
-        if transform.translation.y > PLAYER_START_Y - 20.0 {
-            player.delta_y -= GRAVITY * delta_time / 4.0;
-        } else {
-            player.delta_y += GRAVITY * delta_time / 2.0;
+        player.animation = PlayerAnimation::Idle;
+    }
+
+    // player animation
+    match player.animation {
+        PlayerAnimation::Idle => {
+            if transform.translation.y > PLAYER_START_Y - 20.0 {
+                player.delta_y -= GRAVITY * delta_time / 4.0;
+            } else {
+                player.delta_y += GRAVITY * delta_time / 2.0;
+            }
+        }
+        PlayerAnimation::Jump => {
+            let rotation = MAX_ROTATION - transform.rotation.z;
+            transform.rotate_z(rotation);
+        }
+        PlayerAnimation::Death => {
+            player.delta_y -= GRAVITY * 2.0 * delta_time;
+        }
+        PlayerAnimation::Fall => {
+            // rotation animation
+            if transform.rotation.z > MIN_ROTATION && !game_controller.is_game_paused() {
+                transform.rotate_z(-ROTATION_SPEED * delta_time);
+            }
         }
     }
 
-    if !game_controller.paused {
+    if !game_controller.is_game_paused() {
         transform.translation.y += player.delta_y;
     }
 
@@ -92,15 +115,21 @@ fn player_system(
 
     // check if player dead
     if player.dead {
-        // reset game
-        game_controller.reset_game(
-            &mut commands,
-            &mut player,
-            &mut transform,
-            &mut pipes_query,
-            &pipes_handler,
-            pkv,
-        );
+        game_controller.game_state = GameState::Finished;
+        player.animation = PlayerAnimation::Death;
+
+        game_controller.update_highscore(pkv);
+
+        if keyboard_input.just_pressed(KeyCode::Space) {
+            // reset game
+            game_controller.reset_game(
+                &mut commands,
+                &mut player,
+                &mut transform,
+                &mut pipes_query,
+                &pipes_handler,
+            );
+        }
     }
 }
 
@@ -124,6 +153,14 @@ impl FromWorld for PlayerHandler {
 pub struct Player {
     pub delta_y: f32,
     pub dead: bool,
+    animation: PlayerAnimation,
+}
+
+enum PlayerAnimation {
+    Fall,
+    Jump,
+    Idle,
+    Death,
 }
 
 impl Player {

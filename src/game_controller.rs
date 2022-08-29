@@ -4,25 +4,16 @@ use serde::{Deserialize, Serialize};
 use crate::*;
 
 pub struct GameController {
-    pub started: bool,
-    pub paused: bool,
+    pub game_state: GameState,
+    before_pause: GameState,
+
     pub score: u32,
     pub player_stats: PlayerStatistics,
     pub settings: GameSettings,
 }
 
 impl GameController {
-    pub fn reset_game(
-        &mut self,
-        commands: &mut Commands,
-        player: &mut Player,
-        player_transform: &mut Transform,
-        pipes_query: &mut Query<&mut PipeParent>,
-        pipes_handler: &PipesHandler,
-        mut pkv: ResMut<PkvStore>,
-    ) {
-        self.started = false;
-
+    pub fn update_highscore(&mut self, mut pkv: ResMut<PkvStore>) {
         if self.score > self.player_stats.high_score {
             self.player_stats.high_score = self.score;
 
@@ -31,6 +22,17 @@ impl GameController {
         }
 
         self.score = 0;
+    }
+
+    pub fn reset_game(
+        &mut self,
+        commands: &mut Commands,
+        player: &mut Player,
+        player_transform: &mut Transform,
+        pipes_query: &mut Query<&mut PipeParent>,
+        pipes_handler: &PipesHandler,
+    ) {
+        self.game_state = GameState::Waiting;
 
         player.die(player_transform);
 
@@ -46,8 +48,30 @@ impl GameController {
         }
     }
 
+    pub fn is_game_waiting(&self) -> bool {
+        self.game_state == GameState::Waiting
+    }
+
     pub fn is_game_running(&self) -> bool {
-        self.started && !self.paused
+        self.game_state == GameState::Started
+    }
+
+    pub fn has_game_started(&self) -> bool {
+        self.game_state == GameState::Started
+            || (self.game_state == GameState::Paused && self.before_pause == GameState::Started)
+    }
+
+    pub fn is_game_paused(&self) -> bool {
+        self.game_state == GameState::Paused
+    }
+
+    pub fn pause_game(&mut self) {
+        self.before_pause = self.game_state;
+        self.game_state = GameState::Paused;
+    }
+
+    pub fn resume_game(&mut self) {
+        self.game_state = self.before_pause;
     }
 
     pub fn save_player_stats(&mut self, pkv: &mut PkvStore) {
@@ -71,14 +95,22 @@ impl FromWorld for GameController {
                     ..Default::default()
                 });
 
-        GameController {
-            started: false,
-            paused: false,
+        Self {
+            game_state: GameState::Waiting,
+            before_pause: GameState::Waiting,
             score: 0,
             player_stats,
             settings,
         }
     }
+}
+
+#[derive(PartialEq, Clone, Copy)]
+pub enum GameState {
+    Waiting,
+    Started,
+    Paused,
+    Finished,
 }
 
 #[derive(Serialize, Deserialize)]

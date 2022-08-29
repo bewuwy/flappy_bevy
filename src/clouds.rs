@@ -31,7 +31,7 @@ fn clouds_system(
     game_controller: Res<game_controller::GameController>,
     time: Res<Time>,
 ) {
-    if !game_controller.paused {
+    if !game_controller.is_game_paused() {
         let delta_time: f32 = time.delta().as_secs_f32();
 
         for mut cloud in query.iter_mut() {

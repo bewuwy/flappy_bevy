@@ -19,7 +19,7 @@ mod ui;
 mod window;
 
 use clouds::*;
-use game_controller::GameController;
+use game_controller::*;
 use options::*;
 use pipes::*;
 use player::*;
