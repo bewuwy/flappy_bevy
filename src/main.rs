@@ -39,6 +39,8 @@ fn main() {
         .add_plugins(DefaultPlugins)
         // PKV data storage
         .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
+        // Audio
+        .add_plugin(sound::SoundPlugin)
         // FPS
         // .add_plugin(bevy_framepace::FramepacePlugin)
         // .insert_resource(bevy_framepace::FramepaceSettings::default().with_warnings(false))
@@ -51,8 +53,6 @@ fn main() {
         .add_plugin(CloudsPlugin)
         // UI
         .add_plugin(ui::UIPlugin)
-        // Audio
-        .add_plugin(sound::SoundPlugin)
         // Window
         .add_plugin(window::WindowIconPlugin)
         .run();

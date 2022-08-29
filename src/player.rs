@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 
 use crate::*;
 
@@ -24,19 +25,20 @@ fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
         });
 }
 
-pub fn player_system(
+fn player_system(
     mut commands: Commands,
 
     mut query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
 
-    (mut game_controller, pkv, time, keyboard_input): (
+    (mut game_controller, pkv, time, keyboard_input, _audio): (
         ResMut<GameController>,
         ResMut<PkvStore>,
         Res<Time>,
         Res<Input<KeyCode>>,
+        Res<Audio>,
     ),
-    pipes_handler: Res<PipesHandler>,
+    (pipes_handler, _player_handler): (Res<PipesHandler>, Res<PlayerHandler>),
 ) {
     const MIN_ROTATION: f32 = -0.4;
     const MAX_ROTATION: f32 = 0.7;
@@ -48,30 +50,34 @@ pub fn player_system(
     let (mut player, mut transform) = query.single_mut();
 
     // input processing
-    if keyboard_input.just_pressed(KeyCode::Space) {
+    if keyboard_input.just_pressed(KeyCode::Space) && !game_controller.paused {
         player.delta_y = JUMP_FORCE;
         game_controller.started = true;
+
+        // // play the jump sound
+        // audio.play(player_handler.jump_sound.clone()).with_volume(0.5 * 0.5);
 
         let rotation = MAX_ROTATION - transform.rotation.z;
         transform.rotate_z(rotation);
     }
 
-    // physics
-    transform.translation.y += player.delta_y;
-
-    if game_controller.started {
+    if game_controller.is_game_running() {
         player.delta_y -= GRAVITY * delta_time;
 
         if transform.rotation.z > MIN_ROTATION {
             transform.rotate_z(-ROTATION_SPEED * delta_time);
         }
-    } else {
+    } else if !game_controller.paused {
         // idle animation
         if transform.translation.y > PLAYER_START_Y - 20.0 {
             player.delta_y -= GRAVITY * delta_time / 4.0;
         } else {
             player.delta_y += GRAVITY * delta_time / 2.0;
         }
+    }
+
+    if !game_controller.paused {
+        transform.translation.y += player.delta_y;
     }
 
     // check if player off screen
@@ -93,9 +99,9 @@ pub fn player_system(
     }
 }
 
-// #[derive(Default)]
 struct PlayerHandler {
     texture: Handle<Image>,
+    _jump_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PlayerHandler {
@@ -104,6 +110,7 @@ impl FromWorld for PlayerHandler {
 
         PlayerHandler {
             texture: asset_server.load("sprites/bird.png"),
+            _jump_sound: asset_server.load("sounds/jump.wav"),
         }
     }
 }

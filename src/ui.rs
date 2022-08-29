@@ -525,7 +525,9 @@ fn settings_ui_system(
         settings_visibility.is_visible = !settings_visibility.is_visible;
 
         if settings_visibility.is_visible {
-            game_controller.started = false;
+            game_controller.paused = true;
+        } else {
+            game_controller.paused = false;
         }
     }
 

@@ -19,11 +19,24 @@ fn start_background_audio(
         .looped();
 }
 
+// pause background music when game is paused
+// fn background_audio_system(
+//     audio: Res<Audio>,
+//     game_controller: Res<GameController>,
+// ) {
+//     if game_controller.paused && audio.is_playing_sound() {
+//         audio.pause();
+//     } else if !game_controller.paused && !audio.is_playing_sound() {
+//         audio.resume();
+//     }
+// }
+
 pub struct SoundPlugin;
 
 impl Plugin for SoundPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(AudioPlugin)
+            // .add_system(background_audio_system)
             .add_startup_system(start_background_audio);
     }
 }

@@ -5,6 +5,7 @@ use crate::*;
 
 pub struct GameController {
     pub started: bool,
+    pub paused: bool,
     pub score: u32,
     pub player_stats: PlayerStatistics,
     pub settings: GameSettings,
@@ -45,6 +46,10 @@ impl GameController {
             i += 1.0;
         }
     }
+
+    pub fn is_game_running(&self) -> bool {
+        self.started && !self.paused
+    }
 }
 
 impl FromWorld for GameController {
@@ -64,6 +69,7 @@ impl FromWorld for GameController {
 
         GameController {
             started: false,
+            paused: false,
             score: 0,
             player_stats,
             settings,

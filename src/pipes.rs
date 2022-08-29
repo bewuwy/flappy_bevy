@@ -32,7 +32,7 @@ pub fn pipes_system(
     // get the player and atlas handle
     let (mut player, player_transform) = player_query.single_mut();
 
-    if game_controller.started {
+    if game_controller.is_game_running() {
         // update pipe blocks
         for (_, mut transform) in block_query.iter_mut() {
             transform.translation.x -= PIPES_SPEED * delta_time;

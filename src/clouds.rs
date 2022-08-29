@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::options::*;
+use crate::{game_controller, options::*};
 
 const CLOUDS_SPEED: f32 = 14.0;
 
@@ -28,20 +28,23 @@ fn clouds_system(
     mut block_query: Query<(&mut CloudBlock, &mut Transform)>,
     mut commands: Commands,
     clouds_manager: Res<CloudsHandler>,
+    game_controller: Res<game_controller::GameController>,
     time: Res<Time>,
 ) {
-    let delta_time: f32 = time.delta().as_secs_f32();
+    if !game_controller.paused {
+        let delta_time: f32 = time.delta().as_secs_f32();
 
-    for mut cloud in query.iter_mut() {
-        cloud.x += CLOUDS_SPEED * delta_time;
+        for mut cloud in query.iter_mut() {
+            cloud.x += CLOUDS_SPEED * delta_time;
 
-        if cloud.x > SCREEN_X_BOUNDARY + cloud.width_sprites as f32 * SPRITE_SIZE {
-            cloud.reset(&mut commands, &clouds_manager);
+            if cloud.x > SCREEN_X_BOUNDARY + cloud.width_sprites as f32 * SPRITE_SIZE {
+                cloud.reset(&mut commands, &clouds_manager);
+            }
         }
-    }
 
-    for (_, mut transform) in block_query.iter_mut() {
-        transform.translation.x += CLOUDS_SPEED * delta_time;
+        for (_, mut transform) in block_query.iter_mut() {
+            transform.translation.x += CLOUDS_SPEED * delta_time;
+        }
     }
 }
 
