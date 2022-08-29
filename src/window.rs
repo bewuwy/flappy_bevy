@@ -3,7 +3,6 @@ use bevy::window::WindowId;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;
 
-
 #[allow(dead_code)]
 fn set_window_icon(
     // we have to use `NonSend` here

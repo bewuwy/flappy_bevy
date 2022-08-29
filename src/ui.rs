@@ -3,6 +3,8 @@ use bevy_kira_audio::prelude::*;
 
 use crate::*;
 
+static PRESS_START_TEXT: &str = "Press space to start";
+
 fn ui_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -26,7 +28,9 @@ fn ui_setup(
     };
 
     // texts
+    const AUDIO_SECTION: &str = "Audio";
     const VOLUME_TITLE: &str = "Music volume";
+    const DEBUG_SECTION: &str = "Debug";
 
     // text ui
     commands
@@ -70,20 +74,24 @@ fn ui_setup(
                         ..default()
                     }),
                 )
-                .insert(FPSText)
+                .insert(UiText {
+                    text_type: UiTextType::FPSText,
+                })
                 .insert(UiZ(20.0));
 
             // Start text
             parent
-                .spawn_bundle(
-                    TextBundle::from_sections([TextSection::from_style(TextStyle {
+                .spawn_bundle(TextBundle::from_section(
+                    PRESS_START_TEXT,
+                    TextStyle {
                         font: asset_server.load(FONT_PATH),
                         font_size: 50.0,
                         color: Color::BLACK,
-                    })])
-                    .with_style(Style { ..default() }),
-                )
-                .insert(StartText)
+                    },
+                ))
+                .insert(UiText {
+                    text_type: UiTextType::StartMessage,
+                })
                 .insert(UiZ(20.0));
 
             // Score text
@@ -103,7 +111,9 @@ fn ui_setup(
                         ..default()
                     }),
                 )
-                .insert(ScoreText)
+                .insert(UiText {
+                    text_type: UiTextType::Score,
+                })
                 .insert(UiZ(20.0));
         });
 
@@ -130,7 +140,7 @@ fn ui_setup(
                 ..Default::default()
             },
             visibility: Visibility { is_visible: false },
-            color: Color::rgba(0.0, 0.0, 0.0, 0.9).into(),
+            color: Color::rgba(0.0, 0.0, 0.0, 0.97).into(),
             ..Default::default()
         })
         .with_children(|parent| {
@@ -166,6 +176,17 @@ fn ui_setup(
                         })
                         .insert(UiZ(31.0));
                 });
+
+            // audio settings section
+            SectionHeader::from_title(
+                parent,
+                AUDIO_SECTION,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 40.0,
+                    color: Color::WHITE,
+                },
+            );
 
             // volume setting
             parent
@@ -235,7 +256,7 @@ fn ui_setup(
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: button_color.clone(),
+                            color: button_color,
                             // material: asset_server.load("textures/minus.png").into(),
                             ..Default::default()
                         })
@@ -264,7 +285,7 @@ fn ui_setup(
                     vol_parent
                         .spawn_bundle(ButtonBundle {
                             style: button_style.clone(),
-                            color: button_color.clone(),
+                            color: button_color,
                             // material: asset_server.load("textures/plus.png").into(),
                             ..Default::default()
                         })
@@ -290,6 +311,17 @@ fn ui_setup(
                         });
                 })
                 .insert(UiZ(31.0));
+
+            // debug settings section
+            SectionHeader::from_title(
+                parent,
+                DEBUG_SECTION,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 40.0,
+                    color: Color::WHITE,
+                },
+            );
 
             // show fps setting
             parent
@@ -346,7 +378,7 @@ fn ui_setup(
                                 size: Size::new(Val::Auto, Val::Percent(100.0)),
                                 ..button_style.clone()
                             },
-                            color: button_color.clone(),
+                            color: button_color,
                             ..Default::default()
                         })
                         .with_children(|fps_button| {
@@ -388,7 +420,7 @@ fn ui_setup(
                         },
                         ..button_style.clone()
                     },
-                    color: button_color.clone(),
+                    color: button_color,
                     ..Default::default()
                 })
                 .with_children(|close_button| {
@@ -416,61 +448,59 @@ fn ui_setup(
         .insert(UiZ(30.0));
 }
 
-#[derive(Component)]
-struct FPSText;
-
-fn fps_system(
-    diagnostics: Res<Diagnostics>,
-    mut query: Query<(&mut Text, &mut Visibility), With<FPSText>>,
+fn text_ui_system(
+    mut query: Query<(&mut Text, &mut Visibility, &UiText)>,
     game_controller: Res<GameController>,
+    diagnostics: Res<Diagnostics>,
 ) {
-    let (mut fps_text, mut fps_visibility) = query.single_mut();
+    const HIGH_SCORE_TEXT: &str = "High Score";
 
-    if game_controller.settings.show_fps {
-        fps_visibility.is_visible = true;
+    for (mut text, mut visibility, ui_text) in query.iter_mut() {
+        match ui_text.text_type {
+            UiTextType::StartMessage => {
+                if game_controller.started {
+                    visibility.is_visible = false;
+                } else {
+                    visibility.is_visible = true;
+                }
+            }
+            UiTextType::Score => {
+                if game_controller.started {
+                    text.sections[0].value = game_controller.score.to_string();
+                } else {
+                    text.sections[0].value = format!(
+                        "{}: {}",
+                        HIGH_SCORE_TEXT, game_controller.player_stats.high_score
+                    );
+                }
+            }
+            UiTextType::FPSText => {
+                if game_controller.settings.show_fps {
+                    visibility.is_visible = true;
 
-        if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
-            if let Some(average) = fps.average() {
-                // Update the value of the second section
-                fps_text.sections[1].value = format!("{average:.2}");
+                    if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+                        if let Some(average) = fps.average() {
+                            // Update the value of the second section
+                            text.sections[1].value = format!("{average:.2}");
+                        }
+                    }
+                } else {
+                    visibility.is_visible = false;
+                }
             }
         }
-    } else {
-        fps_visibility.is_visible = false;
     }
 }
 
 #[derive(Component)]
-struct ScoreText;
-
-fn score_text_system(
-    mut query: Query<(&mut Text, With<ScoreText>)>,
-    game_controller: Res<GameController>,
-) {
-    let (mut score_text, _) = query.single_mut();
-
-    if game_controller.started {
-        score_text.sections[0].value = game_controller.score.to_string();
-    } else {
-        score_text.sections[0].value =
-            format!("High score: {}", game_controller.player_stats.high_score);
-    }
+struct UiText {
+    text_type: UiTextType,
 }
 
-#[derive(Component)]
-struct StartText;
-
-fn start_text_system(
-    mut query: Query<(&mut Text, With<StartText>)>,
-    game_controller: Res<GameController>,
-) {
-    let (mut start_text, _) = query.single_mut();
-
-    if game_controller.started {
-        start_text.sections[0].value = "".to_string();
-    } else {
-        start_text.sections[0].value = "Press space to start".to_string();
-    }
+enum UiTextType {
+    StartMessage,
+    Score,
+    FPSText,
 }
 
 #[derive(Component)]
@@ -508,8 +538,6 @@ fn settings_ui_system(
         if interaction == &Interaction::Clicked && button.just_clicked {
             button.just_clicked = false;
             changed = true;
-
-            println!("{:?}", button.button_type);
 
             match button.button_type {
                 SettingsButtonType::VolumeMinus => {
@@ -563,7 +591,6 @@ struct SettingsButton {
     button_type: SettingsButtonType,
 }
 
-#[derive(Debug)]
 enum SettingsButtonType {
     VolumeMinus,
     VolumePlus,
@@ -574,15 +601,42 @@ enum SettingsButtonType {
 #[derive(Component)]
 struct VolumeValueText;
 
+struct SectionHeader; // TODO: change to function
+
+impl SectionHeader {
+    pub fn from_title(parent: &mut ChildBuilder, title: &str, style: TextStyle) -> Self {
+        parent
+            .spawn_bundle(NodeBundle {
+                style: Style {
+                    size: Size::new(Val::Percent(100.0), Val::Auto),
+                    // margin: Rect::all(Val::Px(5.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..Default::default()
+                },
+                color: Color::NONE.into(),
+                ..Default::default()
+            })
+            .with_children(|header_parent| {
+                header_parent
+                    .spawn_bundle(TextBundle {
+                        text: Text::from_section(title, style),
+                        ..Default::default()
+                    })
+                    .insert(UiZ(31.0));
+            });
+
+        Self
+    }
+}
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(UiZPlugin)
             .add_startup_system(ui_setup)
-            .add_system(fps_system)
-            .add_system(score_text_system)
-            .add_system(start_text_system)
+            .add_system(text_ui_system)
             .add_system(settings_ui_system);
     }
 }
