@@ -31,14 +31,17 @@ fn player_system(
     mut query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
 
-    (mut game_controller, pkv, time, keyboard_input, _audio): (
-        ResMut<GameController>,
+    (pkv, time, keyboard_input, audio): (
         ResMut<PkvStore>,
         Res<Time>,
         Res<Input<KeyCode>>,
         Res<Audio>,
     ),
-    (pipes_handler, _player_handler): (Res<PipesHandler>, Res<PlayerHandler>),
+    (mut game_controller, pipes_handler, player_handler): (
+        ResMut<GameController>,
+        Res<PipesHandler>,
+        Res<PlayerHandler>,
+    ),
 ) {
     const MIN_ROTATION: f32 = -0.4;
     const MAX_ROTATION: f32 = 0.7;
@@ -54,8 +57,10 @@ fn player_system(
         player.delta_y = JUMP_FORCE;
         game_controller.started = true;
 
-        // // play the jump sound
-        // audio.play(player_handler.jump_sound.clone()).with_volume(0.5 * 0.5);
+        // play the jump sound
+        audio
+            .play(player_handler.jump_sound.clone())
+            .with_volume(0.25 * 0.5);
 
         let rotation = MAX_ROTATION - transform.rotation.z;
         transform.rotate_z(rotation);
@@ -99,9 +104,9 @@ fn player_system(
     }
 }
 
-struct PlayerHandler {
+pub struct PlayerHandler {
     texture: Handle<Image>,
-    _jump_sound: Handle<AudioSource>,
+    jump_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PlayerHandler {
@@ -110,7 +115,7 @@ impl FromWorld for PlayerHandler {
 
         PlayerHandler {
             texture: asset_server.load("sprites/bird.png"),
-            _jump_sound: asset_server.load("sounds/jump.wav"),
+            jump_sound: asset_server.load("sounds/jump.wav"),
         }
     }
 }

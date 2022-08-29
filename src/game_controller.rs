@@ -27,8 +27,7 @@ impl GameController {
             self.player_stats.high_score = self.score;
 
             // Save the high score
-            pkv.set(PLAYER_STATS_KEY, &self.player_stats)
-                .expect("Failed to save high score");
+            self.save_player_stats(&mut pkv);
         }
 
         self.score = 0;
@@ -49,6 +48,11 @@ impl GameController {
 
     pub fn is_game_running(&self) -> bool {
         self.started && !self.paused
+    }
+
+    pub fn save_player_stats(&mut self, pkv: &mut PkvStore) {
+        pkv.set(PLAYER_STATS_KEY, &self.player_stats)
+            .expect("Failed to save high score");
     }
 }
 

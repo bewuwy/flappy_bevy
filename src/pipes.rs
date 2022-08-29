@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 use rand::prelude::*;
 
 use crate::*;
@@ -18,14 +19,20 @@ fn pipes_setup(mut commands: Commands, pipes_handler: Res<PipesHandler>) {
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn pipes_system(
-    mut player_query: Query<(&mut Player, &mut Transform)>,
-    mut pipes_query: Query<&mut PipeParent>,
-    mut block_query: Query<(&mut PipeBlock, &mut Transform), Without<Player>>,
-    mut game_controller: ResMut<GameController>,
     mut commands: Commands,
-    pipes_handler: Res<PipesHandler>,
+
+    (mut player_query, mut pipes_query, mut block_query): (
+        Query<(&mut Player, &mut Transform)>,
+        Query<&mut PipeParent>,
+        Query<(&mut PipeBlock, &mut Transform), Without<Player>>,
+    ),
+
+    mut game_controller: ResMut<GameController>,
     time: Res<Time>,
+    audio: Res<Audio>,
+    pipes_handler: Res<PipesHandler>,
 ) {
     let delta_time: f32 = time.delta().as_secs_f32();
 
@@ -58,6 +65,13 @@ pub fn pipes_system(
             {
                 pipe.passed_score = true;
                 game_controller.score += 1;
+
+                // play the score sound if high score passed
+                if game_controller.score == game_controller.player_stats.high_score + 1 {
+                    audio
+                        .play(pipes_handler.score_sound.clone())
+                        .with_volume(0.5);
+                }
             }
 
             // check if player touches bottom pipe
@@ -88,6 +102,7 @@ pub fn pipes_system(
 pub struct PipesHandler {
     texture_body: Handle<Image>,
     texture_end: Handle<Image>,
+    score_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PipesHandler {
@@ -97,6 +112,7 @@ impl FromWorld for PipesHandler {
         PipesHandler {
             texture_body: asset_server.load("sprites/pipe/body.png"),
             texture_end: asset_server.load("sprites/pipe/end.png"),
+            score_sound: asset_server.load("sounds/score.wav"),
         }
     }
 }
