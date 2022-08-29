@@ -357,7 +357,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_flappy_bird"
-version = "0.1.0"
+version = "0.1.4"
 dependencies = [
  "bevy",
  "bevy_kira_audio",
