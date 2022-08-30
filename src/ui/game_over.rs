@@ -45,6 +45,15 @@ fn game_over_ui_setup(
             parent
                 .spawn_bundle(TextBundle {
                     text: Text::from_section("", text_style.clone()),
+                    style: Style {
+                        margin: UiRect {
+                            top: Val::Percent(7.0),
+                            bottom: Val::Percent(2.0),
+                            ..Default::default()
+                        },
+                        align_self: AlignSelf::Center,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 })
                 .insert(UiZ(32.0))
@@ -55,6 +64,10 @@ fn game_over_ui_setup(
             parent
                 .spawn_bundle(TextBundle {
                     text: Text::from_section("", text_style.clone()),
+                    style: Style {
+                        align_self: AlignSelf::Center,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 })
                 .insert(UiZ(32.0))
