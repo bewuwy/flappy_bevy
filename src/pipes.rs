@@ -4,17 +4,15 @@ use rand::prelude::*;
 
 use crate::*;
 
-const PIPES_SPEED: f32 = 250.0;
-
 fn pipes_setup(mut commands: Commands, pipes_handler: Res<PipesHandler>) {
-    const PIPES_NUMBER: u32 = 5;
+    let pipes_gap_between = 2.0 * SCREEN_X_BOUNDARY / (PIPES_NUMBER as f32);
 
     // Spawn pipes
     for i in 0..PIPES_NUMBER {
         spawn_pipe(
             &mut commands,
             &pipes_handler,
-            PIPES_START_X + i as f32 * PIPES_GAP_BETWEEN,
+            PIPES_START_X + i as f32 * pipes_gap_between,
         );
     }
 }

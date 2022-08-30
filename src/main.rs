@@ -9,7 +9,7 @@ use bevy::{
 // use bevy_framepace;
 use bevy_pkv::PkvStore;
 
-mod clouds;
+mod background;
 mod game_controller;
 mod options;
 mod pipes;
@@ -18,7 +18,7 @@ mod sound;
 mod ui;
 mod window;
 
-use clouds::*;
+use background::BackgroundPlugin;
 use game_controller::*;
 use options::*;
 use pipes::*;
@@ -48,7 +48,7 @@ fn main() {
         .add_startup_system(setup)
         .add_plugin(PipesPlugin)
         .add_plugin(PlayerPlugin)
-        .add_plugin(CloudsPlugin)
+        .add_plugin(BackgroundPlugin)
         // UI
         .add_plugin(ui::UIPlugin)
         // Window

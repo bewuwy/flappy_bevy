@@ -1,4 +1,6 @@
 pub static GAME_NAME: &str = "Flappy Bevy";
+pub static WINDOW_WIDTH: f32 = 1280.0;
+pub static WINDOW_HEIGHT: f32 = 720.0;
 
 // window settings
 pub static BACKGROUND_COLOR: [f32; 3] = [87.0, 169.0, 241.0]; // 124.0, 182.0, 222.0 // 109.0, 174.0, 219.0
@@ -13,16 +15,18 @@ pub static Z_BACKGROUND: f32 = 2.0;
 // spritesheet settings
 pub static SPRITE_SIZE: f32 = 64.0;
 
-pub static SCREEN_X_BOUNDARY: f32 = 800.0;
-pub static SCREEN_Y_BOUNDARY: f32 = 500.0;
+pub static SCREEN_X_BOUNDARY: f32 = WINDOW_WIDTH / 2.0 + 100.0;
+pub static SCREEN_Y_BOUNDARY: f32 = WINDOW_HEIGHT / 2.0;
 
 // assets settings
 pub static FONT_PATH: &str = "fonts/font.ttf";
 
 // gameplay settings
 // pipes
+pub static PIPES_SPEED: f32 = 250.0;
 pub static PIPES_START_X: f32 = 280.0;
-pub static PIPES_GAP_BETWEEN: f32 = 350.0;
+pub static PIPES_NUMBER: u32 = 5;
+// pub static PIPES_GAP_BETWEEN: f32 = 350.0;
 
 pub static PIPE_HEIGHT_RANGE_SPR: [u32; 2] = [3, 9];
 pub static PIPE_Y_GAP_SPR: u32 = 4;
@@ -37,7 +41,7 @@ pub static PLAYER_START_Y: f32 = -200.0;
 // clouds
 pub static CLOUDS_START_X: f32 = -SCREEN_X_BOUNDARY - SPRITE_SIZE * 3_f32;
 pub static CLOUDS_GAP_BETWEEN: f32 = 250.0;
-pub static CLOUDS_Y_RANGE: [f32; 2] = [-150.0, 300.0];
+pub static CLOUDS_Y_RANGE: [f32; 2] = [-100.0, 400.0];
 
 // pkv data storage keys
 pub static PLAYER_STATS_KEY: &str = "player_stats";

@@ -35,12 +35,14 @@ impl GameController {
         self.score = 0;
         player.die(player_transform);
 
+        let pipes_gap_between = 2.0 * SCREEN_X_BOUNDARY / (PIPES_NUMBER as f32);
+
         let mut i = 0.0;
         for mut pipe in pipes_query.iter_mut() {
             pipe.reset(
                 commands,
                 pipes_handler,
-                PIPES_START_X + i * PIPES_GAP_BETWEEN,
+                PIPES_START_X + i * pipes_gap_between,
             );
 
             i += 1.0;
