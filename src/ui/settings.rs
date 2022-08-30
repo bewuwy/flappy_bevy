@@ -180,7 +180,9 @@ fn settings_ui_system(
         }
     }
 
-    if keyboard_input.just_pressed(KeyCode::Escape) && game_controller.game_state != GameState::Finished {
+    if keyboard_input.just_pressed(KeyCode::Escape)
+        && game_controller.game_state != GameState::Finished
+    {
         close_settings(&mut settings_visibility, &mut game_controller);
     }
 
@@ -217,7 +219,7 @@ fn settings_ui_system(
                         }
                 }
                 SettingsButtonType::Close => {
-                    close_settings(&mut settings_visibility,&mut game_controller);
+                    close_settings(&mut settings_visibility, &mut game_controller);
                 }
                 SettingsButtonType::Reset => {
                     game_controller.player_stats.high_score = 0;

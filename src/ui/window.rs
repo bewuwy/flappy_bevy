@@ -4,14 +4,14 @@ use crate::ui::*;
 
 pub struct UiWindow {
     width_percent: Option<f32>,
-    bg_alpha: Option<f32>
+    bg_alpha: Option<f32>,
 }
 
 impl UiWindow {
     pub fn new() -> Self {
         Self {
             width_percent: None,
-            bg_alpha: None
+            bg_alpha: None,
         }
     }
 
@@ -117,7 +117,7 @@ impl UiButton {
     ) {
         parent
             .spawn_bundle(ButtonBundle {
-                style: button_style.clone(),
+                style: button_style,
                 color: button_color.into(),
                 ..Default::default()
             })
