@@ -20,8 +20,6 @@ impl GameController {
             // Save the high score
             self.save_player_stats(&mut pkv);
         }
-
-        self.score = 0;
     }
 
     pub fn reset_game(
@@ -34,6 +32,7 @@ impl GameController {
     ) {
         self.game_state = GameState::Waiting;
 
+        self.score = 0;
         player.die(player_transform);
 
         let mut i = 0.0;
@@ -65,13 +64,22 @@ impl GameController {
         self.game_state == GameState::Paused
     }
 
+    pub fn is_game_finished(&self, player_transform: &Transform) -> bool {
+        self.game_state == GameState::Finished
+            && player_transform.translation.y < -SCREEN_Y_BOUNDARY
+    }
+
     pub fn pause_game(&mut self) {
         self.before_pause = self.game_state;
         self.game_state = GameState::Paused;
     }
 
     pub fn resume_game(&mut self) {
-        self.game_state = self.before_pause;
+        if self.before_pause == GameState::Finished {
+            self.game_state = GameState::Restart;
+        } else {
+            self.game_state = self.before_pause;
+        }
     }
 
     pub fn save_player_stats(&mut self, pkv: &mut PkvStore) {
@@ -105,12 +113,13 @@ impl FromWorld for GameController {
     }
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum GameState {
     Waiting,
     Started,
     Paused,
     Finished,
+    Restart,
 }
 
 #[derive(Serialize, Deserialize)]

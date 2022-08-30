@@ -17,6 +17,7 @@ pub static SCREEN_X_BOUNDARY: f32 = 800.0;
 pub static SCREEN_Y_BOUNDARY: f32 = 500.0;
 
 // assets settings
+pub static FONT_PATH: &str = "fonts/font.ttf";
 
 // gameplay settings
 // pipes

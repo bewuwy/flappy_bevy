@@ -95,6 +95,10 @@ fn player_system(
         }
         PlayerAnimation::Death => {
             player.delta_y -= GRAVITY * 2.0 * delta_time;
+
+            if transform.rotation.z > MIN_ROTATION * 1.4 {
+                transform.rotate_z(-ROTATION_SPEED * 1.5 * delta_time);
+            }
         }
         PlayerAnimation::Fall => {
             // rotation animation
@@ -115,12 +119,17 @@ fn player_system(
 
     // check if player dead
     if player.dead {
-        game_controller.game_state = GameState::Finished;
+        if game_controller.game_state != GameState::Restart {
+            game_controller.game_state = GameState::Finished;
+        }
         player.animation = PlayerAnimation::Death;
 
         game_controller.update_highscore(pkv);
 
-        if keyboard_input.just_pressed(KeyCode::Space) {
+        if keyboard_input.just_pressed(KeyCode::Space)
+            // || keyboard_input.just_pressed(KeyCode::Escape)
+            || game_controller.game_state == GameState::Restart
+        {
             // reset game
             game_controller.reset_game(
                 &mut commands,
