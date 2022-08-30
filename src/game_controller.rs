@@ -6,8 +6,9 @@ use crate::*;
 pub struct GameController {
     pub game_state: GameState,
     before_pause: GameState,
+    pub speed_multiplier: f32,
 
-    pub score: u32,
+    pub score: i32,
     pub player_stats: PlayerStatistics,
     pub settings: GameSettings,
 }
@@ -33,6 +34,7 @@ impl GameController {
         self.game_state = GameState::Waiting;
 
         self.score = 0;
+        self.speed_multiplier = 1.0;
         player.die(player_transform);
 
         let pipes_gap_between = 2.0 * SCREEN_X_BOUNDARY / (PIPES_NUMBER as f32);
@@ -41,6 +43,7 @@ impl GameController {
         for mut pipe in pipes_query.iter_mut() {
             pipe.reset(
                 commands,
+                self,
                 pipes_handler,
                 PIPES_START_X + i * pipes_gap_between,
             );
@@ -112,6 +115,7 @@ impl FromWorld for GameController {
             score: 0,
             player_stats,
             settings,
+            speed_multiplier: 1.0,
         }
     }
 }
@@ -127,7 +131,7 @@ pub enum GameState {
 
 #[derive(Serialize, Deserialize)]
 pub struct PlayerStatistics {
-    pub high_score: u32,
+    pub high_score: i32,
 }
 
 #[derive(Serialize, Deserialize)]

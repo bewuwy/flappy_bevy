@@ -149,7 +149,7 @@ fn text_ui_system(
             UiTextType::Score => {
                 if game_controller.is_game_finished(player_transform) {
                     visibility.is_visible = false;
-                } else if game_controller.game_state == GameState::Waiting {
+                } else if game_controller.was_game_waiting() {
                     visibility.is_visible = true;
 
                     text.sections[0].value = format!(
@@ -162,7 +162,9 @@ fn text_ui_system(
                 }
             }
             UiTextType::HighScore => {
-                if game_controller.is_game_finished(player_transform) {
+                if game_controller.is_game_finished(player_transform)
+                    || game_controller.game_state == GameState::Waiting
+                {
                     visibility.is_visible = false;
                 } else if game_controller.has_game_started() {
                     visibility.is_visible = true;

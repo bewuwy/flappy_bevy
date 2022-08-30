@@ -1,3 +1,5 @@
+use std::f32::consts::E;
+
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 use rand::prelude::*;
@@ -38,19 +40,27 @@ pub fn pipes_system(
     let (mut player, player_transform) = player_query.single_mut();
 
     if game_controller.is_game_running() {
+        // let pipes_speed_multiplier = 1.2 + ((game_controller.score / 10) as f32 / 10.0);
+        let pipes_delta_x = -PIPES_SPEED * game_controller.speed_multiplier * delta_time;
+        println!(
+            "pipes_speed: {}, score: {}",
+            game_controller.speed_multiplier, game_controller.score
+        );
+
         // update pipe blocks
         for (_, mut transform) in block_query.iter_mut() {
-            transform.translation.x -= PIPES_SPEED * delta_time;
+            transform.translation.x += pipes_delta_x;
         }
 
         // update pipes
         for mut pipe in pipes_query.iter_mut() {
-            pipe.x -= PIPES_SPEED * delta_time;
+            pipe.x += pipes_delta_x;
 
             // check if pipe off screen
             if pipe.x < -SCREEN_X_BOUNDARY {
                 pipe.reset(
                     &mut commands,
+                    &game_controller,
                     &pipes_handler,
                     SCREEN_X_BOUNDARY + SPRITE_SIZE,
                 );
@@ -63,6 +73,14 @@ pub fn pipes_system(
             {
                 pipe.passed_score = true;
                 game_controller.score += 1;
+
+                let a = 0.5;
+                let b = -0.5;
+                let c = 25.0;
+                game_controller.speed_multiplier =
+                    1.0 / (a + E.powf(-(game_controller.score as f32 / c) + b));
+
+                // /*= (1.0 + 1.0/((game_controller.score as f32 * 3.0).powf(2.0) + 1.0)).powf(0.6);
 
                 // play the score sound if high score passed
                 if game_controller.score == game_controller.player_stats.high_score + 1 {
@@ -130,7 +148,22 @@ pub struct PipeParent {
 pub struct PipeBlock;
 
 impl PipeParent {
-    pub fn reset(&mut self, commands: &mut Commands, pipes_handler: &PipesHandler, x: f32) {
+    pub fn reset(
+        &mut self,
+        commands: &mut Commands,
+        game_controller: &GameController,
+        pipes_handler: &PipesHandler,
+        x: f32,
+    ) {
+        self.y_gap_sprites = PIPE_Y_GAP_SPR;
+        // reduce gap if score above
+        if game_controller.score > 15 {
+            self.y_gap_sprites = PIPE_Y_GAP_SPR - 1;
+        }
+        if game_controller.score > 60 {
+            self.y_gap_sprites = PIPE_Y_GAP_SPR - 2;
+        }
+
         // self.passed = false;
         self.passed_score = false;
 
