@@ -88,8 +88,9 @@ impl SectionHeader {
                         text: Text::from_section(title, style),
                         ..Default::default()
                     })
-                    .insert(UiZ(31.0));
-            });
+                    .insert(UiZ(35.0));
+            })
+            .insert(UiZ(34.0));
     }
 }
 

@@ -3,7 +3,9 @@
 use bevy::{
     diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
     prelude::*,
+    render::camera::ScalingMode,
     //?? winit::WinitSettings,
+    window::PresentMode,
 };
 
 // use bevy_framepace;
@@ -28,6 +30,10 @@ fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
             title: GAME_NAME.to_string(),
+            // resizable: false,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
+            present_mode: PresentMode::AutoVsync,
             ..default()
         })
         // .insert_resource(WinitSettings::desktop_app()) //? this breaks the game??
@@ -58,5 +64,12 @@ fn main() {
 
 fn setup(mut commands: Commands) {
     // Add a 2D Camera
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn_bundle(Camera2dBundle {
+        projection: OrthographicProjection {
+            // far: 1000.0,
+            scaling_mode: ScalingMode::FixedVertical(WINDOW_HEIGHT),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 }

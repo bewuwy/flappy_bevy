@@ -131,30 +131,40 @@ fn text_ui_system(
     mut query: Query<(&mut Text, &mut Visibility, &UiText)>,
     game_controller: Res<GameController>,
     diagnostics: Res<Diagnostics>,
+    player_query: Query<(&Player, &Transform)>,
 ) {
     const HIGH_SCORE_TEXT: &str = "High Score";
+
+    let (_, player_transform) = player_query.single();
 
     for (mut text, mut visibility, ui_text) in query.iter_mut() {
         match ui_text.text_type {
             UiTextType::StartMessage => {
-                if game_controller.has_game_started() {
-                    visibility.is_visible = false;
-                } else {
+                if game_controller.was_game_waiting() {
                     visibility.is_visible = true;
+                } else {
+                    visibility.is_visible = false;
                 }
             }
             UiTextType::Score => {
-                if game_controller.has_game_started() {
-                    text.sections[0].value = game_controller.score.to_string();
-                } else {
+                if game_controller.is_game_finished(player_transform) {
+                    visibility.is_visible = false;
+                } else if game_controller.game_state == GameState::Waiting {
+                    visibility.is_visible = true;
+
                     text.sections[0].value = format!(
                         "{}: {}",
                         HIGH_SCORE_TEXT, game_controller.player_stats.high_score
                     );
+                } else {
+                    text.sections[0].value = game_controller.score.to_string();
+                    visibility.is_visible = true;
                 }
             }
             UiTextType::HighScore => {
-                if game_controller.has_game_started() {
+                if game_controller.is_game_finished(player_transform) {
+                    visibility.is_visible = false;
+                } else if game_controller.has_game_started() {
                     visibility.is_visible = true;
 
                     let value = if game_controller.score <= game_controller.player_stats.high_score
@@ -167,8 +177,6 @@ fn text_ui_system(
                     };
 
                     text.sections[0].value = value;
-                } else {
-                    visibility.is_visible = false;
                 }
             }
             UiTextType::FPSText => {
@@ -223,6 +231,7 @@ impl Plugin for UiZPlugin {
             CoreStage::PostUpdate,
             update_uiz.after(bevy::transform::TransformSystem::TransformPropagate),
         );
+        // app.add_system(update_uiz);
     }
 }
 

@@ -49,8 +49,9 @@ impl GameController {
         }
     }
 
-    pub fn is_game_waiting(&self) -> bool {
+    pub fn was_game_waiting(&self) -> bool {
         self.game_state == GameState::Waiting
+            || (self.game_state == GameState::Paused && self.before_pause == GameState::Waiting)
     }
 
     pub fn is_game_running(&self) -> bool {
@@ -115,7 +116,7 @@ impl FromWorld for GameController {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum GameState {
     Waiting,
     Started,

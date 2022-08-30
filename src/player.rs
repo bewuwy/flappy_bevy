@@ -57,7 +57,7 @@ fn player_system(
 
     // input processing
     if keyboard_input.just_pressed(KeyCode::Space)
-        && (game_controller.is_game_running() || game_controller.is_game_waiting())
+        && (game_controller.is_game_running() || game_controller.game_state == GameState::Waiting)
     {
         player.delta_y = JUMP_FORCE;
         game_controller.game_state = GameState::Started;
@@ -77,7 +77,7 @@ fn player_system(
     if game_controller.is_game_running() {
         // apply gravity
         player.delta_y -= GRAVITY * delta_time;
-    } else if game_controller.is_game_waiting() {
+    } else if game_controller.game_state == GameState::Waiting {
         // idle animation
         player.animation = PlayerAnimation::Idle;
     }

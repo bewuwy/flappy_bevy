@@ -15,7 +15,7 @@ pub static Z_BACKGROUND: f32 = 2.0;
 // spritesheet settings
 pub static SPRITE_SIZE: f32 = 64.0;
 
-pub static SCREEN_X_BOUNDARY: f32 = WINDOW_WIDTH / 2.0 + 100.0;
+pub static SCREEN_X_BOUNDARY: f32 = WINDOW_WIDTH / 2.0 + 300.0;
 pub static SCREEN_Y_BOUNDARY: f32 = WINDOW_HEIGHT / 2.0;
 
 // assets settings
