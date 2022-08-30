@@ -11,7 +11,7 @@ fn clouds_setup(
     clouds_handler: Res<CloudsHandler>,
 ) {
     // settings
-    const CLOUDS_NUMBER: usize = 8;
+    const CLOUDS_NUMBER: usize = 7;
 
     // Spawn clouds
     for i in 0..CLOUDS_NUMBER {

@@ -77,6 +77,28 @@ fn ui_setup(
                 })
                 .insert(UiZ(20.0));
 
+            // High score text
+            parent
+                .spawn_bundle(
+                    TextBundle::from_sections([TextSection::from_style(TextStyle {
+                        font: asset_server.load(FONT_PATH),
+                        font_size: 50.0,
+                        color: Color::BLACK,
+                    })])
+                    .with_style(Style {
+                        margin: UiRect {
+                            // top: Val::Percent(10.0),
+                            bottom: Val::Percent(15.0),
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    }),
+                )
+                .insert(UiText {
+                    text_type: UiTextType::HighScore,
+                })
+                .insert(UiZ(20.0));
+
             // Score text
             parent
                 .spawn_bundle(
@@ -88,9 +110,13 @@ fn ui_setup(
                     .with_style(Style {
                         margin: UiRect {
                             top: Val::Percent(10.0),
-                            bottom: Val::Percent(15.0),
+                            // bottom: Val::Percent(15.0),
                             ..Default::default()
                         },
+                        // display: Display::Flex,
+                        // flex_direction: FlexDirection::Column,
+                        // flex_wrap: FlexWrap::Wrap,
+                        // align_content: AlignContent::Center,
                         ..default()
                     }),
                 )
@@ -127,6 +153,24 @@ fn text_ui_system(
                     );
                 }
             }
+            UiTextType::HighScore => {
+                if game_controller.has_game_started() {
+                    visibility.is_visible = true;
+
+                    let value = if game_controller.score <= game_controller.player_stats.high_score
+                    {
+                        game_controller.player_stats.high_score.to_string()
+                    } else if game_controller.score - 1 == game_controller.player_stats.high_score {
+                        "New High Score!".to_string()
+                    } else {
+                        "".to_string()
+                    };
+
+                    text.sections[0].value = value;
+                } else {
+                    visibility.is_visible = false;
+                }
+            }
             UiTextType::FPSText => {
                 if game_controller.settings.show_fps {
                     visibility.is_visible = true;
@@ -153,6 +197,7 @@ struct UiText {
 enum UiTextType {
     StartMessage,
     Score,
+    HighScore,
     FPSText,
 }
 

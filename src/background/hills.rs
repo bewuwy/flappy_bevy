@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::options::*;
+use crate::{game_controller::GameController, options::*};
 
 fn hills_setup(mut commands: Commands, hills_handler: Res<HillsHandler>) {
     const HILL_WIDTH: f32 = 128.0;
@@ -31,14 +31,20 @@ fn hills_setup(mut commands: Commands, hills_handler: Res<HillsHandler>) {
     }
 }
 
-fn hills_system(mut hills_query: Query<(&Hill, &mut Transform)>, time: Res<Time>) {
+fn hills_system(
+    mut hills_query: Query<(&Hill, &mut Transform)>,
+    time: Res<Time>,
+    game_controller: Res<GameController>,
+) {
     let delta_time = time.delta().as_secs_f32();
 
-    for (_, mut transform) in hills_query.iter_mut() {
-        transform.translation.x -= PIPES_SPEED * delta_time * 0.05;
+    if !game_controller.is_game_paused() {
+        for (_, mut transform) in hills_query.iter_mut() {
+            transform.translation.x -= PIPES_SPEED * delta_time * 0.05;
 
-        if transform.translation.x < -SCREEN_X_BOUNDARY {
-            transform.translation.x = SCREEN_X_BOUNDARY;
+            if transform.translation.x < -SCREEN_X_BOUNDARY {
+                transform.translation.x = SCREEN_X_BOUNDARY;
+            }
         }
     }
 }
