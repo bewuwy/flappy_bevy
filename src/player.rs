@@ -22,6 +22,8 @@ fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
         .insert(Player {
             delta_y: 0.0,
             dead: false,
+            hit_sound: false,
+            lose_sound: false,
             animation: PlayerAnimation::Idle,
         });
 }
@@ -63,7 +65,7 @@ fn player_system(
         // play the jump sound
         audio
             .play(player_handler.jump_sound.clone())
-            .with_volume(0.25 * 0.5);
+            .with_volume(game_controller.settings.effects_vol_level * 0.5);
 
         // jump animation
         player.animation = PlayerAnimation::Jump;
@@ -81,29 +83,44 @@ fn player_system(
     }
 
     // player animation
-    match player.animation {
-        PlayerAnimation::Idle => {
-            if transform.translation.y > PLAYER_START_Y - 20.0 {
-                player.delta_y -= GRAVITY * delta_time / 4.0;
-            } else {
-                player.delta_y += GRAVITY * delta_time / 2.0;
+    if !game_controller.is_game_paused() {
+        match player.animation {
+            PlayerAnimation::Idle => {
+                if transform.translation.y > PLAYER_START_Y - 20.0 {
+                    player.delta_y -= GRAVITY * delta_time / 4.0;
+                } else {
+                    player.delta_y += GRAVITY * delta_time / 2.0;
+                }
             }
-        }
-        PlayerAnimation::Jump => {
-            let rotation = MAX_ROTATION - transform.rotation.z;
-            transform.rotate_z(rotation);
-        }
-        PlayerAnimation::Death => {
-            player.delta_y -= GRAVITY * 2.0 * delta_time;
+            PlayerAnimation::Jump => {
+                let rotation = MAX_ROTATION - transform.rotation.z;
+                transform.rotate_z(rotation);
+            }
+            PlayerAnimation::Death => {
+                if !player.hit_sound {
+                    audio
+                        .play(player_handler.hit_sound.clone())
+                        .with_volume(game_controller.settings.effects_vol_level);
+                    player.hit_sound = true;
+                }
+                if game_controller.is_game_finished(&transform) && !player.lose_sound {
+                    audio
+                        .play(player_handler.lose_sound.clone())
+                        .with_volume(2.0 * game_controller.settings.effects_vol_level);
+                    player.lose_sound = true;
+                }
 
-            if transform.rotation.z > MIN_ROTATION * 1.4 {
-                transform.rotate_z(-ROTATION_SPEED * 1.5 * delta_time);
+                player.delta_y -= GRAVITY * 2.0 * delta_time;
+
+                if transform.rotation.z > MIN_ROTATION * 1.4 {
+                    transform.rotate_z(-ROTATION_SPEED * 1.5 * delta_time);
+                }
             }
-        }
-        PlayerAnimation::Fall => {
-            // rotation animation
-            if transform.rotation.z > MIN_ROTATION && !game_controller.is_game_paused() {
-                transform.rotate_z(-ROTATION_SPEED * delta_time);
+            PlayerAnimation::Fall => {
+                // rotation animation
+                if transform.rotation.z > MIN_ROTATION {
+                    transform.rotate_z(-ROTATION_SPEED * delta_time);
+                }
             }
         }
     }
@@ -145,6 +162,8 @@ fn player_system(
 pub struct PlayerHandler {
     texture: Handle<Image>,
     jump_sound: Handle<AudioSource>,
+    hit_sound: Handle<AudioSource>,
+    lose_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PlayerHandler {
@@ -154,6 +173,8 @@ impl FromWorld for PlayerHandler {
         PlayerHandler {
             texture: asset_server.load("sprites/bird.png"),
             jump_sound: asset_server.load("sounds/jump.wav"),
+            hit_sound: asset_server.load("sounds/hit.wav"),
+            lose_sound: asset_server.load("sounds/lose.wav"),
         }
     }
 }
@@ -162,6 +183,8 @@ impl FromWorld for PlayerHandler {
 pub struct Player {
     pub delta_y: f32,
     pub dead: bool,
+    hit_sound: bool,
+    lose_sound: bool,
     animation: PlayerAnimation,
 }
 
@@ -180,6 +203,8 @@ impl Player {
         player_transform.rotation.w = 1.0;
 
         self.dead = false;
+        self.hit_sound = false;
+        self.lose_sound = false;
     }
 }
 

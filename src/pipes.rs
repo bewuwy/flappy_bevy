@@ -70,7 +70,7 @@ pub fn pipes_system(
                 if game_controller.score == game_controller.player_stats.high_score + 1 {
                     audio
                         .play(pipes_handler.score_sound.clone())
-                        .with_volume(0.5);
+                        .with_volume(game_controller.settings.effects_vol_level);
                 }
             }
 

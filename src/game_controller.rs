@@ -129,14 +129,16 @@ pub struct PlayerStatistics {
 
 #[derive(Serialize, Deserialize)]
 pub struct GameSettings {
-    pub vol_level: f64,
+    pub music_vol_level: f64,
+    pub effects_vol_level: f64,
     pub show_fps: bool,
 }
 
 impl Default for GameSettings {
     fn default() -> Self {
         GameSettings {
-            vol_level: 0.5,
+            music_vol_level: 0.5,
+            effects_vol_level: 0.5,
             show_fps: false,
         }
     }

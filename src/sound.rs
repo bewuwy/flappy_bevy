@@ -15,7 +15,7 @@ fn start_background_audio(
             Duration::from_secs(1),
             AudioEasing::OutPowi(2),
         ))
-        .with_volume(game_controller.settings.vol_level as f64)
+        .with_volume(game_controller.settings.music_vol_level as f64)
         .looped();
 }
 

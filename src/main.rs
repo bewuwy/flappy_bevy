@@ -42,8 +42,6 @@ fn main() {
         // Audio
         .add_plugin(sound::SoundPlugin)
         // FPS
-        // .add_plugin(bevy_framepace::FramepacePlugin)
-        // .insert_resource(bevy_framepace::FramepaceSettings::default().with_warnings(false))
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // Game systems
         .init_resource::<GameController>()

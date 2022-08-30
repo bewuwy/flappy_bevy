@@ -48,7 +48,7 @@ fn settings_ui_setup(
                 },
             );
 
-            // volume setting
+            // music volume setting
             SettingsElement::create(
                 parent,
                 TextStyle {
@@ -58,10 +58,26 @@ fn settings_ui_setup(
                 },
                 "Music volume",
                 &[
-                    (SettingsButtonType::VolumeMinus, "-"),
-                    (SettingsButtonType::VolumePlus, "+"),
+                    (SettingsButtonType::MusicVolumeMinus, "-"),
+                    (SettingsButtonType::MusicVolumePlus, "+"),
                 ],
-                Some(SettingValueType::Volume),
+                Some(SettingValueType::MusicVolume),
+            );
+
+            // sound effect volume setting
+            SettingsElement::create(
+                parent,
+                TextStyle {
+                    font: asset_server.load(FONT_PATH),
+                    font_size: 30.0,
+                    color: Color::WHITE,
+                },
+                "Sound effects volume",
+                &[
+                    (SettingsButtonType::EffectsVolumeMinus, "-"),
+                    (SettingsButtonType::EffectsVolumePlus, "+"),
+                ],
+                Some(SettingValueType::EffectsVolume),
             );
 
             // debug settings section
@@ -194,18 +210,32 @@ fn settings_ui_system(
             changed = true;
 
             match button.button_type {
-                SettingsButtonType::VolumeMinus => {
-                    game_controller.settings.vol_level -= 0.05;
+                SettingsButtonType::MusicVolumeMinus => {
+                    game_controller.settings.music_vol_level -= 0.05;
 
-                    if game_controller.settings.vol_level < 0.0 {
-                        game_controller.settings.vol_level = 0.0;
+                    if game_controller.settings.music_vol_level < 0.0 {
+                        game_controller.settings.music_vol_level = 0.0;
                     }
                 }
-                SettingsButtonType::VolumePlus => {
-                    game_controller.settings.vol_level += 0.05;
+                SettingsButtonType::MusicVolumePlus => {
+                    game_controller.settings.music_vol_level += 0.05;
 
-                    if game_controller.settings.vol_level > 1.0 {
-                        game_controller.settings.vol_level = 1.0;
+                    if game_controller.settings.music_vol_level > 1.0 {
+                        game_controller.settings.music_vol_level = 1.0;
+                    }
+                }
+                SettingsButtonType::EffectsVolumeMinus => {
+                    game_controller.settings.effects_vol_level -= 0.05;
+
+                    if game_controller.settings.effects_vol_level < 0.0 {
+                        game_controller.settings.effects_vol_level = 0.0;
+                    }
+                }
+                SettingsButtonType::EffectsVolumePlus => {
+                    game_controller.settings.effects_vol_level += 0.05;
+
+                    if game_controller.settings.effects_vol_level > 1.0 {
+                        game_controller.settings.effects_vol_level = 1.0;
                     }
                 }
                 SettingsButtonType::FPSShow => {
@@ -233,15 +263,19 @@ fn settings_ui_system(
 
     for (mut text, setting_value_text) in value_query.iter_mut() {
         match setting_value_text.value_type {
-            SettingValueType::Volume => {
+            SettingValueType::MusicVolume => {
                 text.sections[0].value =
-                    format!("{:.0}%", game_controller.settings.vol_level * 100.0);
+                    format!("{:.0}%", game_controller.settings.music_vol_level * 100.0);
+            }
+            SettingValueType::EffectsVolume => {
+                text.sections[0].value =
+                    format!("{:.0}%", game_controller.settings.effects_vol_level * 100.0);
             }
         }
     }
 
     if changed {
-        audio.set_volume(game_controller.settings.vol_level);
+        audio.set_volume(game_controller.settings.music_vol_level);
 
         // update settings in pkv
         pkv.set(GAME_SETTINGS_KEY, &game_controller.settings)
@@ -362,8 +396,10 @@ struct SettingsButton {
 
 #[derive(Clone, Copy)]
 enum SettingsButtonType {
-    VolumeMinus,
-    VolumePlus,
+    MusicVolumeMinus,
+    MusicVolumePlus,
+    EffectsVolumeMinus,
+    EffectsVolumePlus,
     FPSShow,
     Close,
     Reset,
@@ -375,7 +411,8 @@ struct SettingValueText {
 }
 
 enum SettingValueType {
-    Volume,
+    MusicVolume,
+    EffectsVolume,
 }
 
 pub struct SettingsPlugin;
