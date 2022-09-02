@@ -5,7 +5,7 @@ use bevy::prelude::*;
 
 use crate::*;
 
-static JUMP_FORCE: f32 = 10.0;
+static JUMP_FORCE: f32 = 10.0 / 1.5;
 static GRAVITY: f32 = 30.0;
 
 fn player_setup(mut commands: Commands, player_handler: Res<PlayerHandler>) {
