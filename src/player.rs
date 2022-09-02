@@ -42,10 +42,10 @@ fn player_system(
         // ResMut<PkvStore>,
         // Res<Audio>,
     ),
-    (mut game_controller, pipes_handler, player_handler): (
+    (mut game_controller, pipes_handler): ( // player_handler): (
         ResMut<GameController>,
         Res<PipesHandler>,
-        Res<PlayerHandler>,
+        // Res<PlayerHandler>,
     ),
 ) {
     const MIN_ROTATION: f32 = -0.4;

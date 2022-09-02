@@ -95,6 +95,7 @@ impl GameController {
 }
 
 impl FromWorld for GameController {
+    #[allow(unused_variables)]
     fn from_world(world: &mut World) -> Self {
         // let pkv = world.get_resource::<PkvStore>().unwrap();
 

@@ -17,7 +17,7 @@ mod game_controller;
 mod options;
 mod pipes;
 mod player;
-mod sound;
+// mod sound;
 mod ui;
 mod window;
 mod android;
@@ -48,8 +48,8 @@ fn main() {
         // .add_plugins(DefaultPlugins)
         // // PKV data storage
         // .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
-        // Audio
-        .add_plugin(sound::SoundPlugin)
+        // // Audio
+        // .add_plugin(sound::SoundPlugin)
         // FPS
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // Game systems
