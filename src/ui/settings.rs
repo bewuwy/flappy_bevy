@@ -1,5 +1,7 @@
-use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
+use bevy::prelude::*;    
+// #[cfg(not(target_arch="aarch64-linux-android"))]
+// #[cfg(not(target_arch="armv7-linux-androideabi"))]
+// use bevy_kira_audio::prelude::*;
 
 use crate::ui::*;
 
@@ -174,11 +176,11 @@ fn settings_ui_system(
     mut text_query: Query<&mut Text, Without<SettingValueText>>, // todo: change this
     mut value_query: Query<(&mut Text, &SettingValueText)>,
 
-    (mut game_controller, keyboard_input, mut pkv, audio): (
+    (mut game_controller, keyboard_input): ( // mut pkv): ( // audio): (
         ResMut<GameController>,
         Res<Input<KeyCode>>,
-        ResMut<PkvStore>,
-        Res<Audio>,
+        // ResMut<PkvStore>,
+        // Res<Audio>,
     ),
 ) {
     let mut settings_visibility = settings_visibility_query.single_mut();
@@ -253,7 +255,7 @@ fn settings_ui_system(
                 }
                 SettingsButtonType::Reset => {
                     game_controller.player_stats.high_score = 0;
-                    game_controller.save_player_stats(&mut pkv)
+                    // game_controller.save_player_stats(&mut pkv)
                 }
             }
         } else if interaction != &Interaction::Clicked {
@@ -275,11 +277,11 @@ fn settings_ui_system(
     }
 
     if changed {
-        audio.set_volume(game_controller.settings.music_vol_level);
+        // audio.set_volume(game_controller.settings.music_vol_level);
 
-        // update settings in pkv
-        pkv.set(GAME_SETTINGS_KEY, &game_controller.settings)
-            .expect("Failed to save game settings");
+        // // update settings in pkv
+        // pkv.set(GAME_SETTINGS_KEY, &game_controller.settings)
+        //     .expect("Failed to save game settings");
     }
 }
 

@@ -4,12 +4,13 @@ use bevy::{
     diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
     prelude::*,
     render::camera::ScalingMode,
+    render::settings::{WgpuSettings, WgpuSettingsPriority},
     //?? winit::WinitSettings,
     window::PresentMode,
 };
 
 // use bevy_framepace;
-use bevy_pkv::PkvStore;
+// use bevy_pkv::PkvStore;
 
 mod background;
 mod game_controller;
@@ -19,6 +20,7 @@ mod player;
 mod sound;
 mod ui;
 mod window;
+mod android;
 
 use background::BackgroundPlugin;
 use game_controller::*;
@@ -26,14 +28,13 @@ use options::*;
 use pipes::*;
 use player::*;
 
+
+#[bevy_main]
 fn main() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            title: GAME_NAME.to_string(),
-            // resizable: false,
-            width: WINDOW_WIDTH,
-            height: WINDOW_HEIGHT,
-            present_mode: PresentMode::AutoVsync,
+        // #[cfg(target_arch="aarch64-linux-android", "armv7-linux-androideabi")]
+        .insert_resource(WgpuSettings {
+            priority: WgpuSettingsPriority::Compatibility,
             ..default()
         })
         // .insert_resource(WinitSettings::desktop_app()) //? this breaks the game??
@@ -42,9 +43,11 @@ fn main() {
             BACKGROUND_COLOR[1] / 255.0,
             BACKGROUND_COLOR[2] / 255.0,
         )))
-        .add_plugins(DefaultPlugins)
-        // PKV data storage
-        .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
+        // Default plugins
+        .add_plugin(PlatformBuildPlugin)
+        // .add_plugins(DefaultPlugins)
+        // // PKV data storage
+        // .insert_resource(PkvStore::new("bewuwy", GAME_NAME))
         // Audio
         .add_plugin(sound::SoundPlugin)
         // FPS
@@ -57,8 +60,8 @@ fn main() {
         .add_plugin(BackgroundPlugin)
         // UI
         .add_plugin(ui::UIPlugin)
-        // Window
-        .add_plugin(window::WindowIconPlugin)
+        // // Window
+        // .add_plugin(window::WindowIconPlugin)
         .run();
 }
 
@@ -72,4 +75,28 @@ fn setup(mut commands: Commands) {
         },
         ..Default::default()
     });
+}
+
+struct PlatformBuildPlugin;
+
+impl Plugin for PlatformBuildPlugin {
+    fn build(&self, app: &mut App) {
+        #[cfg(not(target_arch="aarch64-linux-android"))]
+        #[cfg(not(target_arch="armv7-linux-androideabi"))]
+        app.insert_resource(WindowDescriptor {
+            title: GAME_NAME.to_string(),
+            // resizable: false,
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
+            present_mode: PresentMode::AutoVsync,
+            ..default()
+        });
+
+        if cfg!(target_arch="aarch64-linux-android") || cfg!(target_arch="armv7-linux-androideabi") {
+            app.add_plugins(android::DefaultAndroidPlugins);
+        }
+        else {
+            app.add_plugins(DefaultPlugins);
+        }
+    }
 }

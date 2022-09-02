@@ -14,14 +14,14 @@ pub struct GameController {
 }
 
 impl GameController {
-    pub fn update_highscore(&mut self, mut pkv: ResMut<PkvStore>) {
-        if self.score > self.player_stats.high_score {
-            self.player_stats.high_score = self.score;
+    // pub fn update_highscore(&mut self, mut pkv: ResMut<PkvStore>) {
+    //     if self.score > self.player_stats.high_score {
+    //         self.player_stats.high_score = self.score;
 
-            // Save the high score
-            self.save_player_stats(&mut pkv);
-        }
-    }
+    //         // Save the high score
+    //         self.save_player_stats(&mut pkv);
+    //     }
+    // }
 
     pub fn reset_game(
         &mut self,
@@ -88,26 +88,27 @@ impl GameController {
         }
     }
 
-    pub fn save_player_stats(&mut self, pkv: &mut PkvStore) {
-        pkv.set(PLAYER_STATS_KEY, &self.player_stats)
-            .expect("Failed to save high score");
-    }
+    // pub fn save_player_stats(&mut self, pkv: &mut PkvStore) {
+    //     pkv.set(PLAYER_STATS_KEY, &self.player_stats)
+    //         .expect("Failed to save high score");
+    // }
 }
 
 impl FromWorld for GameController {
     fn from_world(world: &mut World) -> Self {
-        let pkv = world.get_resource::<PkvStore>().unwrap();
+        // let pkv = world.get_resource::<PkvStore>().unwrap();
 
         // Load saved data
-        let player_stats: PlayerStatistics = pkv
-            .get::<PlayerStatistics>(PLAYER_STATS_KEY)
-            .unwrap_or(PlayerStatistics { high_score: 0 });
+        let player_stats = PlayerStatistics { high_score: 0 };
+        // PlayerStatistics = pkv
+        //     .get::<PlayerStatistics>(PLAYER_STATS_KEY)
+        //     .unwrap_or(PlayerStatistics { high_score: 0 });
 
-        let settings: GameSettings =
-            pkv.get::<GameSettings>(GAME_SETTINGS_KEY)
-                .unwrap_or(GameSettings {
-                    ..Default::default()
-                });
+        let settings: GameSettings = GameSettings{..Default::default()};
+            // pkv.get::<GameSettings>(GAME_SETTINGS_KEY)
+            //     .unwrap_or(GameSettings {
+            //         ..Default::default()
+            //     });
 
         Self {
             game_state: GameState::Waiting,

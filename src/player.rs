@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
+// #[cfg(not(target_arch="aarch64-linux-android"))]
+// #[cfg(not(target_arch="armv7-linux-androideabi"))]
+// use bevy_kira_audio::prelude::*;
 
 use crate::*;
 
@@ -34,11 +36,11 @@ fn player_system(
     mut query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
 
-    (pkv, time, keyboard_input, audio): (
-        ResMut<PkvStore>,
+    (time, keyboard_input): ( // pkv, audio): (
         Res<Time>,
         Res<Input<KeyCode>>,
-        Res<Audio>,
+        // ResMut<PkvStore>,
+        // Res<Audio>,
     ),
     (mut game_controller, pipes_handler, player_handler): (
         ResMut<GameController>,
@@ -62,16 +64,23 @@ fn player_system(
         player.delta_y = JUMP_FORCE;
         game_controller.game_state = GameState::Started;
 
-        // play the jump sound
-        audio
-            .play(player_handler.jump_sound.clone())
-            .with_volume(game_controller.settings.effects_vol_level * 0.5);
+        // // play the jump sound
+        // #[cfg(not(target_arch="aarch64-linux-android"))]
+        // #[cfg(not(target_arch="armv7-linux-androideabi"))]    
+        // audio
+        //     .play(player_handler.jump_sound.clone())
+        //     .with_volume(game_controller.settings.effects_vol_level * 0.5);
 
         // jump animation
         player.animation = PlayerAnimation::Jump;
     } else if keyboard_input.just_released(KeyCode::Space) {
         // stop the jump animation
         player.animation = PlayerAnimation::Fall;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::P) {
+        // game_controller.game_state = GameState::Paused;
+        game_controller.score += 10;
     }
 
     if game_controller.is_game_running() {
@@ -98,15 +107,19 @@ fn player_system(
             }
             PlayerAnimation::Death => {
                 if !player.hit_sound {
-                    audio
-                        .play(player_handler.hit_sound.clone())
-                        .with_volume(game_controller.settings.effects_vol_level);
+                    // #[cfg(not(target_arch="aarch64-linux-android"))]
+                    // #[cfg(not(target_arch="armv7-linux-androideabi"))]                
+                    // audio
+                    //     .play(player_handler.hit_sound.clone())
+                    //     .with_volume(game_controller.settings.effects_vol_level);
                     player.hit_sound = true;
                 }
                 if game_controller.is_game_finished(&transform) && !player.lose_sound {
-                    audio
-                        .play(player_handler.lose_sound.clone())
-                        .with_volume(2.0 * game_controller.settings.effects_vol_level);
+                    // #[cfg(not(target_arch="aarch64-linux-android"))]
+                    // #[cfg(not(target_arch="armv7-linux-androideabi"))]                
+                    // audio
+                    //     .play(player_handler.lose_sound.clone())
+                    //     .with_volume(2.0 * game_controller.settings.effects_vol_level);
                     player.lose_sound = true;
                 }
 
@@ -141,7 +154,7 @@ fn player_system(
         }
         player.animation = PlayerAnimation::Death;
 
-        game_controller.update_highscore(pkv);
+        // game_controller.update_highscore(pkv);
 
         if keyboard_input.just_pressed(KeyCode::Space)
             // || keyboard_input.just_pressed(KeyCode::Escape)
@@ -161,9 +174,9 @@ fn player_system(
 
 pub struct PlayerHandler {
     texture: Handle<Image>,
-    jump_sound: Handle<AudioSource>,
-    hit_sound: Handle<AudioSource>,
-    lose_sound: Handle<AudioSource>,
+    // jump_sound: Handle<AudioSource>,
+    // hit_sound: Handle<AudioSource>,
+    // lose_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PlayerHandler {
@@ -172,9 +185,9 @@ impl FromWorld for PlayerHandler {
 
         PlayerHandler {
             texture: asset_server.load("sprites/bird.png"),
-            jump_sound: asset_server.load("sounds/jump.wav"),
-            hit_sound: asset_server.load("sounds/hit.wav"),
-            lose_sound: asset_server.load("sounds/lose.wav"),
+            // jump_sound: asset_server.load("sounds/jump.wav"),
+            // hit_sound: asset_server.load("sounds/hit.wav"),
+            // lose_sound: asset_server.load("sounds/lose.wav"),
         }
     }
 }

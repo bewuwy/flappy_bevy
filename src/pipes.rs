@@ -1,7 +1,9 @@
 use std::f32::consts::E;
 
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
+// #[cfg(not(target_arch="aarch64-linux-android"))]
+// #[cfg(not(target_arch="armv7-linux-androideabi"))]
+// use bevy_kira_audio::prelude::*;
 use rand::prelude::*;
 
 use crate::*;
@@ -31,7 +33,7 @@ pub fn pipes_system(
 
     mut game_controller: ResMut<GameController>,
     time: Res<Time>,
-    audio: Res<Audio>,
+    // audio: Res<Audio>,
     pipes_handler: Res<PipesHandler>,
 ) {
     let delta_time: f32 = time.delta().as_secs_f32();
@@ -84,9 +86,9 @@ pub fn pipes_system(
 
                 // play the score sound if high score passed
                 if game_controller.score == game_controller.player_stats.high_score + 1 {
-                    audio
-                        .play(pipes_handler.score_sound.clone())
-                        .with_volume(game_controller.settings.effects_vol_level);
+                    // audio
+                    //     .play(pipes_handler.score_sound.clone())
+                    //     .with_volume(game_controller.settings.effects_vol_level);
                 }
             }
 
@@ -118,7 +120,7 @@ pub fn pipes_system(
 pub struct PipesHandler {
     texture_body: Handle<Image>,
     texture_end: Handle<Image>,
-    score_sound: Handle<AudioSource>,
+    // score_sound: Handle<AudioSource>,
 }
 
 impl FromWorld for PipesHandler {
@@ -128,7 +130,7 @@ impl FromWorld for PipesHandler {
         PipesHandler {
             texture_body: asset_server.load("sprites/pipe/body.png"),
             texture_end: asset_server.load("sprites/pipe/end.png"),
-            score_sound: asset_server.load("sounds/score.wav"),
+            // score_sound: asset_server.load("sounds/score.wav"),
         }
     }
 }

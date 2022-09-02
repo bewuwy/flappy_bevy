@@ -31,7 +31,9 @@ pub struct WindowIconPlugin;
 impl Plugin for WindowIconPlugin {
     #[allow(unused_variables)]
     fn build(&self, app: &mut App) {
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_arch="wasm32"))] 
+        #[cfg(not(target_arch="aarch64-linux-android"))]
+        #[cfg(not(target_arch="armv7-linux-androideabi"))]
         app.add_startup_system(set_window_icon);
     }
 }
