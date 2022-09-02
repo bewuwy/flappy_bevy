@@ -36,9 +36,9 @@ fn player_system(
     mut query: Query<(&mut Player, &mut Transform)>,
     mut pipes_query: Query<&mut PipeParent>,
 
-    (time, keyboard_input): ( // pkv, audio): (
+    (time, touches): ( // pkv, audio): (
         Res<Time>,
-        Res<Input<KeyCode>>,
+        Res<Touches>, // Res<Input<KeyCode>>,
         // ResMut<PkvStore>,
         // Res<Audio>,
     ),
@@ -58,30 +58,32 @@ fn player_system(
     let (mut player, mut transform) = query.single_mut();
 
     // input processing
-    if keyboard_input.just_pressed(KeyCode::Space)
-        && (game_controller.is_game_running() || game_controller.game_state == GameState::Waiting)
-    {
-        player.delta_y = JUMP_FORCE;
-        game_controller.game_state = GameState::Started;
+    // for finger in touches.iter() {
+        if touches.any_just_pressed()
+            && (game_controller.is_game_running() || game_controller.game_state == GameState::Waiting)
+        {
+            player.delta_y = JUMP_FORCE;
+            game_controller.game_state = GameState::Started;
 
-        // // play the jump sound
-        // #[cfg(not(target_arch="aarch64-linux-android"))]
-        // #[cfg(not(target_arch="armv7-linux-androideabi"))]    
-        // audio
-        //     .play(player_handler.jump_sound.clone())
-        //     .with_volume(game_controller.settings.effects_vol_level * 0.5);
+            // // play the jump sound
+            // #[cfg(not(target_arch="aarch64-linux-android"))]
+            // #[cfg(not(target_arch="armv7-linux-androideabi"))]    
+            // audio
+            //     .play(player_handler.jump_sound.clone())
+            //     .with_volume(game_controller.settings.effects_vol_level * 0.5);
 
-        // jump animation
-        player.animation = PlayerAnimation::Jump;
-    } else if keyboard_input.just_released(KeyCode::Space) {
-        // stop the jump animation
-        player.animation = PlayerAnimation::Fall;
-    }
+            // jump animation
+            player.animation = PlayerAnimation::Jump;
+        } else if touches.any_just_released() {
+            // stop the jump animation
+            player.animation = PlayerAnimation::Fall;
+        }
+    // }
 
-    if keyboard_input.just_pressed(KeyCode::P) {
-        // game_controller.game_state = GameState::Paused;
-        game_controller.score += 10;
-    }
+    // if keyboard_input.just_pressed(KeyCode::P) {
+    //     // game_controller.game_state = GameState::Paused;
+    //     game_controller.score += 10;
+    // }
 
     if game_controller.is_game_running() {
         // apply gravity
@@ -154,11 +156,11 @@ fn player_system(
         }
         player.animation = PlayerAnimation::Death;
 
-        // game_controller.update_highscore(pkv);
+        game_controller.update_highscore();
 
-        if keyboard_input.just_pressed(KeyCode::Space)
-            // || keyboard_input.just_pressed(KeyCode::Escape)
-            || game_controller.game_state == GameState::Restart
+        if // keyboard_input.just_pressed(KeyCode::Space)
+            // || keyboard_input.just_pressed(KeyCode::Escape) ||
+            game_controller.game_state == GameState::Restart
         {
             // reset game
             game_controller.reset_game(

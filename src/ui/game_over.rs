@@ -29,7 +29,7 @@ fn game_over_ui_setup(
     };
 
     let window = UiWindow::new();
-    window.with_width_percent(0.4f32).spawn_with_children(
+    window.with_width_percent(0.9f32).spawn_with_children(
         &mut commands,
         |parent| {
             SectionHeader::from_title(

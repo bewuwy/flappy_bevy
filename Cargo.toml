@@ -47,11 +47,14 @@ winres = "0.1.12"
 package = "com.bewu.flappy"
 apk_name = "flappy_bewu"
 assets = "assets"
+resources="res"
 
 build_targets = ["aarch64-linux-android", "armv7-linux-androideabi"]
 
 [package.metadata.android.application]
 label = "Flappy Bevy"
+icon = "@mipmap/ic_launcher"
+
 
 [package.metadata.android.sdk]
 target_sdk_version = 31

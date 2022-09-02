@@ -28,7 +28,7 @@ pub static PIPES_START_X: f32 = 280.0;
 pub static PIPES_NUMBER: u32 = 5;
 // pub static PIPES_GAP_BETWEEN: f32 = 350.0;
 
-pub static PIPE_HEIGHT_RANGE_SPR: [u32; 2] = [3, 9];
+pub static PIPE_HEIGHT_RANGE_SPR: [u32; 2] = [4, 8];
 pub static PIPE_Y_GAP_SPR: u32 = 4;
 pub static PIPE_FLOOR_Y_SPR: i32 = -8; // -500
 

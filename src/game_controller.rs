@@ -14,14 +14,14 @@ pub struct GameController {
 }
 
 impl GameController {
-    // pub fn update_highscore(&mut self, mut pkv: ResMut<PkvStore>) {
-    //     if self.score > self.player_stats.high_score {
-    //         self.player_stats.high_score = self.score;
+    pub fn update_highscore(&mut self) { // mut pkv: ResMut<PkvStore>) {
+        if self.score > self.player_stats.high_score {
+            self.player_stats.high_score = self.score;
 
-    //         // Save the high score
-    //         self.save_player_stats(&mut pkv);
-    //     }
-    // }
+            // // Save the high score
+            // self.save_player_stats(&mut pkv);
+        }
+    }
 
     pub fn reset_game(
         &mut self,

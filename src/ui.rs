@@ -8,7 +8,7 @@ mod game_over;
 mod settings;
 mod window;
 
-static PRESS_START_TEXT: &str = "Press space to start";
+static PRESS_START_TEXT: &str = "Press space";
 
 fn ui_setup(
     mut commands: Commands,
@@ -133,7 +133,7 @@ fn text_ui_system(
     diagnostics: Res<Diagnostics>,
     player_query: Query<(&Player, &Transform)>,
 ) {
-    const HIGH_SCORE_TEXT: &str = "High Score";
+    const HIGH_SCORE_TEXT: &str = "HS";
 
     let (_, player_transform) = player_query.single();
 
